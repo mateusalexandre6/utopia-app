@@ -1,0 +1,112 @@
+<dialog class="modal modal-open animate-fade-in bg-black/30 backdrop-blur-sm">
+  <div class="modal-box w-11/12 max-w-3xl p-6 relative bg-gray-800 text-gray-100 rounded-2xl shadow-xl border border-gray-700">
+
+    <!-- Cabeçalho -->
+    <div class="border-b border-gray-700/50 pb-3 mb-4">
+      <h3 class="font-bold text-xl text-gray-100">Criar Novo Tópico de Discussão</h3>
+      <p class="text-sm text-gray-300 mt-1">Inicie um debate ou apresente uma proposta.</p>
+    </div>
+    <button (click)="close.emit()" class="btn btn-sm btn-circle btn-ghost absolute right-3 top-3 text-gray-100 hover:bg-gray-700/50">✕</button>
+
+    <!-- Formulário -->
+    <form #topicForm="ngForm" (ngSubmit)="onSave(topicForm)" class="space-y-6">
+
+      <!-- Título -->
+      <div class="form-control">
+        <label class="label"><span class="label-text text-gray-200">Título</span></label>
+        <input
+          name="title"
+          #titleModel="ngModel"
+          [(ngModel)]="model.title"
+          type="text"
+          required
+          minlength="10"
+          placeholder="Título claro e conciso para a discussão ou proposta"
+          class="input input-bordered w-full rounded-xl bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+          [class.input-error]="titleModel.invalid && titleModel.touched"
+        />
+        <p *ngIf="titleModel.invalid && titleModel.touched" class="text-yellow-300 text-sm mt-1">Título inválido (mínimo 10 caracteres).</p>
+      </div>
+
+      <!-- Conteúdo Inicial -->
+      <div class="form-control">
+        <label class="label"><span class="label-text text-gray-200">Conteúdo Inicial</span></label>
+        <textarea
+          name="content"
+          #contentModel="ngModel"
+          [(ngModel)]="model.content"
+          rows="8"
+          required
+          minlength="20"
+          placeholder="Descreva a sua proposta, questão ou ponto de discussão em detalhes..."
+          class="textarea textarea-bordered w-full rounded-xl bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none transition"
+          [class.textarea-error]="contentModel.invalid && contentModel.touched">
+        </textarea>
+        <p *ngIf="contentModel.invalid && contentModel.touched" class="text-yellow-300 text-sm mt-1">Conteúdo inválido (mínimo 20 caracteres).</p>
+      </div>
+
+      <!-- Visibilidade -->
+      <div class="form-control">
+        <label class="label text-gray-200"><span class="label-text">Visibilidade</span></label>
+        <div class="join w-full">
+          <button
+            type="button"
+            class="btn join-item w-1/2"
+            [class.btn-primary]="model.scope === 'national'"
+            (click)="model.scope = 'national'; onScopeChange()">Nacional (Todos)</button>
+          <button
+            type="button"
+            class="btn join-item w-1/2"
+            [class.btn-primary]="model.scope === 'organization'"
+            (click)="model.scope = 'organization'">Apenas um Núcleo</button>
+        </div>
+      </div>
+
+      <!-- Seleção do Núcleo -->
+      <div *ngIf="model.scope === 'organization'" class="form-control animate-fade-in">
+        <label class="label text-gray-200"><span class="label-text">Selecione o Núcleo</span></label>
+        <select
+          name="organizationId"
+          #orgModel="ngModel"
+          [(ngModel)]="model.organizationId"
+          required
+          class="select select-bordered w-full rounded-xl bg-gray-700 border-gray-600 text-gray-100 focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+          [class.select-error]="orgModel.invalid && orgModel.touched">
+          <option value="" disabled>Escolha o núcleo para esta discussão</option>
+          @for (org of organizations(); track org.id) {
+            <option [value]="org.id">{{ org.name }}</option>
+          }
+        </select>
+        <p *ngIf="orgModel.invalid && orgModel.touched" class="text-yellow-300 text-sm mt-1">Selecione um núcleo válido.</p>
+      </div>
+
+      <!-- Mensagem de erro geral -->
+      <div *ngIf="errorMessage()" role="alert" class="alert alert-error text-sm text-gray-100">
+        <span>{{ errorMessage() }}</span>
+      </div>
+
+      <!-- Ações -->
+      <div class="modal-action justify-end mt-4 flex gap-3">
+        <button type="button" (click)="close.emit()" class="btn btn-ghost rounded-xl hover:bg-gray-700/50 text-gray-100">Cancelar</button>
+        <button type="submit" class="btn btn-primary rounded-xl flex items-center gap-2" [disabled]="isLoading() || !topicForm.valid">
+          <ng-container *ngIf="isLoading()">
+            <app-loading-spinner sizeClass="w-5 h-5"></app-loading-spinner>
+          </ng-container>
+          Criar Tópico
+        </button>
+      </div>
+
+    </form>
+  </div>
+</dialog>
+
+<style>
+  .animate-fade-in {
+    animation: fade-in 0.25s ease-out forwards;
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>

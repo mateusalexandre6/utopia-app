@@ -1,0 +1,76 @@
+<div class="space-y-6">
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <div class="card-title flex flex-col sm:flex-row justify-between items-center gap-4">
+        <h1 class="text-2xl font-bold">Gerenciamento de Eventos</h1>
+
+        <div class="join">
+          <button class="btn btn-sm join-item"
+                  [class.btn-primary]="filterState() === 'my-organizations'"
+                  (click)="filterState.set('my-organizations')"
+                  [disabled]="isNationalAdmin()">
+            Minhas Organizações
+          </button>
+          <button class="btn btn-sm join-item"
+                  [class.btn-primary]="filterState() === 'all'"
+                  (click)="filterState.set('all')">
+            Todas
+          </button>
+        </div>
+
+        <button (click)="onNewActivity()" class="btn btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>
+          Novo Evento
+        </button>
+      </div>
+
+      <div class="overflow-x-auto mt-4">
+        @if (isLoading()) {
+
+          } @else {
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th>Evento</th>
+                <th>Comissão</th>
+                <th>Núcleo</th>
+                <th>Data</th>
+                <th class="text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (activity of filteredActivities(); track activity.id) {
+                <tr class="hover animate-fade-in-up">
+                  <td>
+                    <div class="font-bold">{{ activity.title }}</div>
+                    <div class="text-sm opacity-60">{{ activity.description | slice:0:50 }}...</div>
+                  </td>
+                  <td>{{ activity.commissionName }}</td>
+                  <td><span class="badge badge-ghost">{{ activity.organizationName }}</span></td>
+                  <td>{{ activity.date.toDate() | date: 'dd/MM/yy HH:mm' }}</td>
+                  <td class="text-right">
+                    @if (canModify(activity.parentOrganizationId)) {
+                      <div class="join">
+                        <button (click)="onEdit(activity)" class="btn btn-ghost btn-xs join-item">Editar</button>
+                        <button (click)="onDelete(activity)" class="btn btn-error btn-xs join-item text-error-content">Excluir</button>
+                      </div>
+                    } @else {
+                      <span class="text-xs opacity-50">Somente Leitura</span>
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                }
+            </tbody>
+          </table>
+        }
+      </div>
+    </div>
+  </div>
+ @if (isFormVisible) {
+    <app-activity-form
+      [activityToEdit]="editingActivity!"
+      (close)="onCloseForm()">
+    </app-activity-form>
+  }
+  </div>

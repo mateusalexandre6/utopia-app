@@ -1,0 +1,139 @@
+<dialog class="modal modal-open">
+  <div class="modal-box w-11/12 max-w-2xl bg-gray-800 text-gray-100 shadow-xl rounded-lg relative">
+    <!-- Cabeçalho -->
+    <h3 class="text-xl font-bold mb-1">
+      @if (isEditMode) { Editar Evento } @else { Novo Evento }
+    </h3>
+    <p class="text-sm text-gray-400 mb-4">
+      Selecione o núcleo e depois a comissão responsável.
+    </p>
+
+    <!-- Botão Fechar -->
+    <button
+      (click)="close.emit()"
+      class="btn btn-sm btn-circle btn-ghost absolute right-3 top-3 hover:bg-gray-700 text-gray-200"
+    >
+      ✕
+    </button>
+
+    <!-- Formulário -->
+    <form (ngSubmit)="onSave()" class="space-y-5">
+      <!-- Título -->
+      <div class="form-control">
+        <label class="label mb-1">
+          <span class="label-text text-gray-200 font-medium">Título do Evento</span>
+        </label>
+        <input
+          [ngModel]="model().title"
+          (ngModelChange)="updateTitle($event)"
+          name="title"
+          type="text"
+          required
+          class="w-full border border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-400 rounded-lg px-4 py-2 transition focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+        />
+      </div>
+
+      <!-- Núcleo -->
+      <div class="form-control">
+        <label class="label mb-1">
+          <span class="label-text text-gray-200 font-medium">Núcleo</span>
+        </label>
+        <select
+          [ngModel]="model().organizationId"
+          (ngModelChange)="onOrganizationChange($event)"
+          name="organizationId"
+          required
+          [disabled]="isNucleoLocked()"
+          class="w-full border border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-400 rounded-lg px-4 py-2 transition focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary disabled:opacity-60"
+        >
+          <option disabled selected value="">Selecione um núcleo</option>
+          @for (org of allOrganizations(); track org.id) {
+            <option [value]="org.id">{{ org.name }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Comissão -->
+      <div class="form-control">
+        <label class="label mb-1">
+          <span class="label-text text-gray-200 font-medium">Comissão</span>
+        </label>
+        <select
+          [ngModel]="model().commissionId"
+          (ngModelChange)="onCommissionChange($event)"
+          name="commissionId"
+          required
+          [disabled]="!model().organizationId"
+          class="w-full border border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-400 rounded-lg px-4 py-2 transition focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary disabled:opacity-60"
+        >
+          <option disabled selected value="">Selecione uma comissão</option>
+          @for (commission of availableCommissions(); track commission.id) {
+            <option [value]="commission.id">{{ commission.name }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Data e Hora -->
+      <div class="form-control">
+        <label class="label mb-1">
+          <span class="label-text text-gray-200 font-medium">Data e Hora</span>
+        </label>
+        <input
+          [ngModel]="model().date"
+          (ngModelChange)="updateDate($event)"
+          name="date"
+          type="datetime-local"
+          required
+          class="w-full border border-gray-600 bg-gray-700 text-gray-100 rounded-lg px-4 py-2 transition focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+        />
+      </div>
+
+      <!-- Descrição -->
+      <div class="form-control">
+        <label class="label mb-1">
+          <span class="label-text text-gray-200 font-medium">Descrição (Opcional)</span>
+        </label>
+        <textarea
+          [ngModel]="model().description"
+          (ngModelChange)="updateDescription($event)"
+          name="description"
+          rows="3"
+          class="w-full border border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-400 rounded-lg px-4 py-2 transition focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none"
+        ></textarea>
+      </div>
+
+      <!-- Mensagem de erro -->
+      @if (errorMessage) {
+        <div
+          role="alert"
+          class="border border-yellow-600 bg-yellow-900/30 text-yellow-300 rounded-lg px-3 py-2 text-sm animate-fade-in-down"
+        >
+          <span>{{ errorMessage }}</span>
+        </div>
+      }
+    </form>
+
+    <!-- Ações -->
+    <div class="modal-action mt-6 flex justify-end gap-3">
+      <button
+        (click)="close.emit()"
+        class="btn btn-ghost text-white hover:bg-gray-700 rounded-lg px-5"
+      >
+        Cancelar
+      </button>
+      <button
+        (click)="onSave()"
+        class="btn btn-primary rounded-lg px-6 transition-all duration-300 hover:scale-[1.02] active:scale-[0.97]"
+        [disabled]="isLoading"
+      >
+        @if (isLoading) {
+           <app-loading-spinner></app-loading-spinner>
+         } @else { Salvar }
+      </button>
+    </div>
+  </div>
+
+  <form method="dialog" class="modal-backdrop" (click)="close.emit()">
+    <button>close</button>
+  </form>
+</dialog>

@@ -1,0 +1,101 @@
+<div class="card bg-gray-800 border border-gray-700 shadow-lg rounded-lg">
+  <div class="card-body">
+    <!-- Cabeçalho -->
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold text-gray-100">Organizações</h2>
+      <button (click)="isFormVisible = true"
+              class="btn btn-sm bg-primary hover:bg-primary/80 text-white rounded-lg flex items-center gap-1 shadow-md transition-all">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 20 20"
+             fill="currentColor"
+             class="w-5 h-5">
+          <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+        </svg>
+        Nova Organização
+      </button>
+    </div>
+
+    <!-- Tabela -->
+    <div class="overflow-x-auto border border-gray-700 rounded-lg shadow-inner">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-700 text-gray-200 uppercase tracking-wide text-xs">
+          <tr>
+            <th class="text-left px-4 py-3">Nome</th>
+            <th class="text-left px-4 py-3">Nível</th>
+            <th class="text-left px-4 py-3">Tipo</th>
+            <th class="text-right px-4 py-3">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-700">
+          @for (org of organizations(); track org.id) {
+            <tr class="hover:bg-gray-750 transition-all duration-200 animate-fade-in-up">
+              <td class="px-4 py-3 text-gray-100 font-medium">{{ org.name }}</td>
+              <td class="px-4 py-3">
+                <span class="bg-gray-700 text-gray-200 text-xs px-2 py-1 rounded-full border border-gray-600">
+                  {{ org.level }}
+                </span>
+              </td>
+              <td class="px-4 py-3">
+                <span class="bg-gray-700 text-gray-200 text-xs px-2 py-1 rounded-full border border-gray-600">
+                  {{ org.type }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <div class="flex justify-end gap-2">
+                  <button (click)="onEdit(org)"
+                          class="btn btn-ghost btn-xs text-gray-300 hover:text-primary hover:bg-gray-700 rounded-md transition-all">
+                    Editar
+                  </button>
+                  <button (click)="onDelete(org)"
+                          class="btn btn-ghost btn-xs text-red-400 hover:bg-red-900/30 hover:text-red-300 border border-transparent hover:border-red-700 rounded-md transition-all">
+                    Excluir
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="4" class="text-center py-8 text-gray-400">
+                Nenhuma organização encontrada.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Exclusão -->
+<dialog id="delete_modal" class="modal">
+  <div class="modal-box bg-gray-800 text-gray-100 border border-gray-700 shadow-xl rounded-lg">
+    <h3 class="font-bold text-lg text-red-400">Confirmar Exclusão</h3>
+    @if (organizationToDelete) {
+      <p class="py-4 text-gray-300">
+        Tem certeza que deseja excluir permanentemente a organização
+        <strong class="text-gray-100">"{{ organizationToDelete.name }}"</strong>?
+        <br>Esta ação não pode ser desfeita.
+      </p>
+    }
+    <div class="modal-action">
+      <form method="dialog" class="flex gap-2">
+        <button class="btn btn-ghost text-gray-300 hover:bg-gray-700 rounded-md">Cancelar</button>
+        <button (click)="confirmDelete()"
+                class="btn bg-red-600 hover:bg-red-700 text-white rounded-md">
+          Sim, Excluir
+        </button>
+      </form>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop bg-black/70">
+    <button>close</button>
+  </form>
+</dialog>
+
+<!-- Formulário (Modal externo) -->
+@if (isFormVisible) {
+  <app-organization-form
+    [organization]="editingOrganization!"
+    (close)="onCloseForm()">
+  </app-organization-form>
+}

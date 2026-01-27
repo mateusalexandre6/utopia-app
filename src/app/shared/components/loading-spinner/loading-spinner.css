@@ -1,0 +1,11 @@
+/* src/app/shared/components/loading-spinner/loading-spinner.component.css */
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spinner-image {
+  animation: spin 1s linear infinite;
+  /* REMOVA AS LINHAS DE WIDTH E HEIGHT DAQUI */
+}

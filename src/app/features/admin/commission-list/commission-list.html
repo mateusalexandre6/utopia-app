@@ -1,0 +1,120 @@
+<div class="space-y-4">
+  <!-- Header e Filtros -->
+  <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+    <div class="flex rounded-lg overflow-hidden border border-gray-700">
+      <button class="px-4 py-2 text-sm font-medium transition-all duration-200"
+              [ngClass]="{
+                'bg-primary text-white': filterState() === 'my-organizations',
+                'bg-gray-800 text-gray-300 hover:bg-gray-700': filterState() !== 'my-organizations'
+              }"
+              (click)="filterState.set('my-organizations')"
+              [disabled]="isNationalAdmin()">
+        Minhas Comissões
+      </button>
+      <button class="px-4 py-2 text-sm font-medium transition-all duration-200"
+              [ngClass]="{
+                'bg-primary text-white': filterState() === 'all',
+                'bg-gray-800 text-gray-300 hover:bg-gray-700': filterState() !== 'all'
+              }"
+              (click)="filterState.set('all')">
+        Todas
+      </button>
+    </div>
+
+    <button (click)="onNewCommission()"
+            class="btn btn-sm bg-primary hover:bg-primary/80 text-white rounded-lg flex items-center gap-2 shadow-md transition-all duration-200">
+      <svg xmlns="http://www.w3.org/2000/svg"
+           viewBox="0 0 20 20"
+           fill="currentColor"
+           class="w-5 h-5">
+        <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+      </svg>
+      Nova Comissão
+    </button>
+  </div>
+
+  <!-- Tabela -->
+  <div class="overflow-x-auto border border-gray-700 rounded-lg shadow-md">
+    @if (isLoading()) {
+      <div class="p-6 text-center text-gray-400 animate-pulse">Carregando...</div>
+    } @else {
+      <table class="w-full text-sm">
+        <thead class="bg-gray-700 text-gray-200">
+          <tr>
+            <th class="text-left px-4 py-3">Nome da Comissão</th>
+            <th class="text-left px-4 py-3">Núcleo (Organização)</th>
+            <th class="text-right px-4 py-3">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-700">
+          @for (commission of filteredCommissions(); track commission.id) {
+            <tr class="hover:bg-gray-750 transition-all duration-200 animate-fade-in-up">
+              <td class="px-4 py-3">
+                <div class="font-semibold text-gray-100">{{ commission.name }}</div>
+                <div class="text-xs text-gray-400">{{ commission.description | slice:0:70 }}...</div>
+              </td>
+              <td class="px-4 py-3">
+                <span class="bg-gray-700 text-gray-200 text-xs px-2 py-1 rounded-full border border-gray-600">
+                  {{ commission.organizationName }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-right">
+                @if (canModify(commission.organizationId)) {
+                  <div class="flex justify-end gap-2">
+                    <button (click)="onEdit(commission)"
+                            class="btn btn-ghost btn-xs text-gray-300 hover:text-primary hover:bg-gray-700 rounded-md transition-all">
+                      Editar
+                    </button>
+                    <button (click)="onDelete(commission)"
+                            class="btn btn-ghost btn-xs text-red-400 hover:bg-red-900/30 hover:text-red-300 border border-transparent hover:border-red-700 rounded-md transition-all">
+                      Excluir
+                    </button>
+                  </div>
+                } @else {
+                  <span class="text-xs text-gray-500 italic">Somente Leitura</span>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="3" class="text-center py-8 text-gray-400">Nenhuma comissão encontrada.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
+
+<!-- Formulário (modal externo) -->
+@if (isFormVisible) {
+  <app-commission-form
+    [commissionToEdit]="editingCommission!"
+    (close)="onCloseForm()">
+  </app-commission-form>
+}
+
+<!-- Modal de exclusão -->
+<dialog id="delete_commission_modal" class="modal">
+  <div class="modal-box bg-gray-800 text-gray-100 border border-gray-700 shadow-xl rounded-lg">
+    <h3 class="font-bold text-lg text-red-400">Confirmar Exclusão</h3>
+    @if (commissionToDelete) {
+      <p class="py-4 text-gray-300">
+        Tem certeza que deseja excluir a comissão
+        <strong class="text-gray-100">"{{ commissionToDelete.name }}"</strong>?
+      </p>
+    }
+    <div class="modal-action">
+      <form method="dialog" class="flex gap-2">
+        <button class="btn btn-ghost text-gray-300 hover:bg-gray-700 rounded-md">Cancelar</button>
+        <button (click)="confirmDelete()"
+                class="btn bg-red-600 hover:bg-red-700 text-white rounded-md">
+          Sim, Excluir
+        </button>
+      </form>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop bg-black/70">
+    <button>close</button>
+  </form>
+</dialog>

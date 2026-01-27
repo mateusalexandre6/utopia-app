@@ -1,0 +1,47 @@
+/* src/app/home/home.component.css */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animação para os itens do menu flutuante (FAB) */
+@keyframes slideInUpMenu {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.6s ease-in-out forwards;
+}
+
+/* Classe para animar os itens do menu */
+.animate-menu-item {
+  animation: slideInUpMenu 0.3s ease-out forwards;
+  opacity: 0; /* Garante que comece invisível */
+}

@@ -1,0 +1,99 @@
+<dialog class="modal modal-open">
+  <div class="modal-box max-w-lg rounded-2xl bg-gray-800 text-gray-100 shadow-xl relative">
+    <!-- Cabeçalho -->
+    <div class="flex items-center justify-between mb-2">
+      <h3 class="text-lg font-semibold text-white">
+        @if (isEditMode) { Editar Palestrante } @else { Novo Palestrante }
+      </h3>
+      <button
+        (click)="close.emit()"
+        class="btn btn-sm btn-circle btn-ghost text-gray-300 hover:text-white hover:bg-gray-700 transition"
+        aria-label="Fechar"
+      >
+        ✕
+      </button>
+    </div>
+
+    <!-- Formulário -->
+    <form (ngSubmit)="onSave()" class="mt-4 space-y-6">
+      <!-- Nome -->
+      <div>
+        <label for="name" class="block text-sm font-medium text-gray-200 mb-1">Nome do Palestrante</label>
+        <input
+          id="name"
+          name="name"
+          type="text"
+          [(ngModel)]="model.name"
+          required
+          placeholder="Digite o nome completo do palestrante"
+          class="w-full rounded-lg border border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-400 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+        />
+      </div>
+
+      <!-- Núcleo de Origem -->
+      <div>
+        <label for="organizationId" class="block text-sm font-medium text-gray-200 mb-1">Núcleo de Origem</label>
+        <select
+          id="organizationId"
+          name="organizationId"
+          [(ngModel)]="model.organizationId"
+          required
+          class="w-full rounded-lg border border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-400 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+        >
+          <option disabled selected value="">Selecione o núcleo do palestrante</option>
+          @for (org of organizations(); track org.id) {
+            <option [value]="org.id">{{ org.name }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Mini-biografia -->
+      <div>
+        <label for="bio" class="block text-sm font-medium text-gray-200 mb-1">Mini-biografia</label>
+        <textarea
+          id="bio"
+          name="bio"
+          rows="4"
+          [(ngModel)]="model.bio"
+          placeholder="Breve descrição sobre o palestrante..."
+          class="w-full rounded-lg border border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-400 px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+        ></textarea>
+      </div>
+
+      <!-- Mensagem de erro -->
+      @if (errorMessage) {
+        <div
+          role="alert"
+          class="rounded-lg bg-yellow-900/30 border border-yellow-600 text-yellow-300 px-4 py-2 text-sm"
+        >
+          <span>{{ errorMessage }}</span>
+        </div>
+      }
+    </form>
+
+    <!-- Ações -->
+    <div class="modal-action mt-6 flex justify-end gap-3">
+      <button
+        (click)="close.emit()"
+        type="button"
+        class="btn btn-ghost text-gray-300 hover:text-white hover:bg-gray-700 transition"
+      >
+        Cancelar
+      </button>
+      <button
+        (click)="onSave()"
+        type="submit"
+        class="btn btn-primary px-6"
+        [disabled]="isLoading"
+      >
+        @if(isLoading) { <span class="loading loading-spinner"></span> }
+        Salvar
+      </button>
+    </div>
+  </div>
+
+  <!-- Fundo -->
+  <form method="dialog" class="modal-backdrop" (click)="close.emit()">
+    <button>close</button>
+  </form>
+</dialog>

@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  frontend:
+    build: .
+    container_name: utopia_frontend_dev
+    ports:
+      - "4200:0568"
+    volumes:
+      # Mapeia o código local para dentro do contêiner para habilitar o hot-reload
+      - .:/app
+      # Evita que a pasta node_modules local sobrescreva a do contêiner
+      - /app/node_modules

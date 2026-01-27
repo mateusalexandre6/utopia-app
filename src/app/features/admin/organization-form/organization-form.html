@@ -1,0 +1,63 @@
+<dialog class="modal modal-open animate-fade-in">
+  <div class="modal-box">
+    <div class="border-b border-base-300/50 pb-4 mb-4">
+      <h3 class="font-bold text-lg">
+        @if (isEditMode) {
+          Editar Organização
+        } @else {
+          Nova Organização
+        }
+      </h3>
+      <p class="text-sm opacity-60">
+        Preencha os detalhes do núcleo ou coordenação.
+      </p>
+    </div>
+    <button (click)="close.emit()" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+
+    <form (ngSubmit)="onSave()" class="py-4 space-y-4">
+      <div class="form-control">
+        <label class="label"><span class="label-text">Nome</span></label>
+        <input [(ngModel)]="model.name" name="name" type="text" required placeholder="Ex: Núcleo São Paulo" class="input input-bordered w-full" />
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="form-control">
+          <label class="label"><span class="label-text">Nível</span></label>
+          <select [(ngModel)]="model.level" name="level" class="select select-bordered w-full">
+            <option disabled selected value="">Selecione o nível</option>
+            <option value="state">Estadual</option>
+            <option value="national">Nacional</option>
+          </select>
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text">Tipo</span></label>
+          <select [(ngModel)]="model.type" name="type" class="select select-bordered w-full">
+            <option disabled selected value="">Selecione o tipo</option>
+            <option value="nucleus">Núcleo</option>
+            <option value="coordination">Coordenação</option>
+          </select>
+        </div>
+      </div>
+
+      @if (errorMessage) {
+        <div role="alert" class="alert alert-warning text-sm animate-fade-in-up">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+          <span>{{ errorMessage }}</span>
+        </div>
+      }
+    </form>
+
+    <div class="modal-action">
+      <button (click)="close.emit()" class="btn btn-ghost">Cancelar</button>
+      <button (click)="onSave()" class="btn btn-primary" [disabled]="isLoading">
+        @if(isLoading) {
+
+          <app-loading-spinner></app-loading-spinner>
+         }
+        Salvar
+      </button>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop" (click)="close.emit()"><button>close</button></form>
+</dialog>

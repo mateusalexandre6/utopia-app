@@ -1,0 +1,122 @@
+<div class="max-w-4xl mx-auto space-y-8 p-4 text-gray-100">
+
+  <!-- Breadcrumbs -->
+  <div class="text-sm breadcrumbs text-gray-300">
+    <ul>
+      <li><a routerLink="/forum" class="link link-hover text-gray-400 hover:text-primary">Fórum</a></li>
+      @if (topic()) {
+        <li class="text-gray-200">{{ topic()?.title }}</li>
+      } @else if (isLoading()) {
+        <li class="text-gray-500">Carregando...</li>
+      } @else {
+        <li class="text-red-400">Tópico não encontrado</li>
+      }
+    </ul>
+  </div>
+
+  <!-- Loading -->
+  @if (isLoading()) {
+    <div class="text-center p-12"><span class="loading loading-spinner loading-lg text-gray-300"></span></div>
+  } @else if (!topic()) {
+    <div class="alert alert-error bg-red-900/30 text-red-300 border-red-700">Tópico não encontrado ou você não tem permissão para visualizá-lo.</div>
+  } @else {
+
+    <!-- Tópico Principal -->
+    <article class="card bg-gray-800 shadow-md border border-gray-700/50 rounded-xl">
+      <div class="card-body space-y-3">
+        <h1 class="card-title text-3xl font-bold text-gray-100">{{ topic()?.title }}</h1>
+        <p class="text-xs text-gray-400">
+          Criado por {{ topic()?.createdByDisplayName }} em {{ topic()?.createdAt?.toDate() | date:'medium':'':'pt-BR' }}
+          @if (topic()?.scope === 'organization') {
+            <span class="badge badge-ghost badge-sm ml-2 bg-gray-700 text-gray-200">{{ getTopics() }}</span>
+          } @else {
+            <span class="badge badge-primary badge-sm ml-2">Nacional</span>
+          }
+        </p>
+        <div class="divider border-gray-700/50 my-3"></div>
+        <div class="prose max-w-none text-gray-200">{{ topic()?.content }}</div>
+      </div>
+    </article>
+
+    <!-- Votação -->
+    @if (topic()?.status === 'voting') {
+      <section class="card bg-gray-700/50 shadow-sm border border-gray-700/50 rounded-xl">
+        <div class="card-body space-y-3">
+          <h2 class="card-title text-xl text-gray-100">Votação da Proposta</h2>
+          <p class="text-sm text-gray-300">Expresse sua opinião sobre esta proposta. Seu voto é importante.</p>
+
+          <div class="join mt-4 w-full">
+            <button class="btn join-item btn-success" [class.btn-active]="myVote() === 'yes'" (click)="handleVote('yes')">Sim</button>
+            <button class="btn join-item btn-error" [class.btn-active]="myVote() === 'no'" (click)="handleVote('no')">Não</button>
+            <button class="btn join-item" [class.btn-active]="myVote() === 'abstain'" (click)="handleVote('abstain')">Abster-se</button>
+          </div>
+
+          <div class="mt-6 space-y-2">
+            <div class="flex items-center gap-2">
+              <span class="w-12 text-right font-medium text-success">{{ voteCounts().yes }}</span>
+              <progress class="progress progress-success w-full" [value]="voteCounts().yes" [max]="totalVotes() || 1"></progress>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-12 text-right font-medium text-error">{{ voteCounts().no }}</span>
+              <progress class="progress progress-error w-full" [value]="voteCounts().no" [max]="totalVotes() || 1"></progress>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-12 text-right font-medium text-gray-400">{{ voteCounts().abstain }}</span>
+              <progress class="progress w-full" [value]="voteCounts().abstain" [max]="totalVotes() || 1"></progress>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- Respostas -->
+    <section class="space-y-4">
+      <h2 class="text-xl font-bold text-gray-100">Respostas ({{ posts().length }})</h2>
+      @for (post of posts(); track post.id) {
+        <article class="card card-compact bg-gray-800 shadow-sm border border-gray-700/50 rounded-xl animate-fade-in-up">
+          <div class="card-body space-y-2">
+            <p class="text-xs text-gray-400">
+              <strong>{{ post.createdByDisplayName }}</strong> em {{ post.createdAt.toDate() | date:'short':'':'pt-BR' }}
+            </p>
+            <p class="text-gray-100">{{ post.content }}</p>
+          </div>
+        </article>
+      } @empty {
+        <p class="text-center text-gray-400 p-4">Nenhuma resposta ainda.</p>
+      }
+    </section>
+
+    <!-- Formulário de Resposta -->
+    <section class="card bg-gray-800 shadow border border-gray-700/50 rounded-xl">
+      <div class="card-body space-y-3">
+        <h2 class="card-title text-lg text-gray-100">Adicionar Resposta</h2>
+        <form #replyForm="ngForm" (ngSubmit)="handlePostReply(replyForm)" class="space-y-3">
+          <div class="form-control">
+            <textarea name="newPostContent" [(ngModel)]="newPostContent" rows="4" required minlength="5" placeholder="Digite sua resposta aqui..."
+                      class="textarea textarea-bordered w-full rounded-xl bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-primary/50 focus:border-primary transition resize-none"></textarea>
+          </div>
+          @if (postError()) {
+            <div class="alert alert-warning text-yellow-300 text-sm mt-2 bg-yellow-900/30 border-yellow-600"><span>{{ postError() }}</span></div>
+          }
+          <div class="card-actions justify-end mt-2">
+            <button type="submit" class="btn btn-primary rounded-xl flex items-center gap-2" [disabled]="isPosting() || !replyForm.valid">
+              @if(isPosting()) { <app-loading-spinner sizeClass="w-5 h-5"></app-loading-spinner> }
+              Enviar Resposta
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+  }
+</div>
+
+<style>
+  .animate-fade-in-up {
+    animation: fade-in-up 0.25s ease-out forwards;
+  }
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>

@@ -1,0 +1,379 @@
+<div class="max-w-5xl mx-auto space-y-6 p-4">
+
+  <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+    <div class="text-sm breadcrumbs">
+      <ul>
+        <li><a routerLink="/cursos" class="link link-hover">Cursos</a></li>
+        <li>{{ pageTitle() }}</li>
+      </ul>
+    </div>
+    <div class="flex items-center gap-2">
+      <button type="button" class="btn btn-ghost btn-sm" (click)="resetModel()">Redefinir</button>
+      <button type="submit" form="courseForm" class="btn btn-primary" [disabled]="isLoading() || !courseForm.valid">
+        <span *ngIf="isLoading()" class="mr-2 loading loading-spinner"></span>
+        Salvar Curso
+      </button>
+    </div>
+  </div>
+
+  <form #courseForm="ngForm" id="courseForm" (ngSubmit)="onSave(courseForm)" class="space-y-6">
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <div role="tablist" class="tabs tabs-bordered">
+          <a role="tab" class="tab" [class.tab-active]="activeTab() === 'info'" (click)="setActiveTab('info')">Informações</a>
+          <a role="tab" class="tab" [class.tab-active]="activeTab() === 'content'" (click)="setActiveTab('content')">Conteúdo</a>
+          <a role="tab" class="tab" [class.tab-active]="activeTab() === 'location'" (click)="setActiveTab('location')">Local</a>
+          <a role="tab" class="tab gap-2" [class.tab-active]="activeTab() === 'registrations'" (click)="setActiveTab('registrations')">
+    Inscrições
+    <div class="badge badge-primary">{{ registrations().length }}</div>
+
+  </a>
+   <a role="tab" class="tab" [class.tab-active]="activeTab() === 'actions'" (click)="setActiveTab('actions')">Divulgação e Ações</a>
+        </div>
+
+        <div class="pt-6">
+          @if (activeTab() === 'info') {
+            <div class="space-y-8 animate-fade-in text-gray-100">
+  <!-- Linha: Título e Slug -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Título -->
+    <div>
+      <label for="title" class="block text-sm font-medium text-gray-300 mb-2">Título do Curso</label>
+      <input
+        id="title"
+        name="title"
+        #titleModel="ngModel"
+        [(ngModel)]="model().title"
+        (ngModelChange)="onTitleChange($event)"
+        required
+        minlength="5"
+        maxlength="120"
+        placeholder="Digite o título do curso"
+        class="w-full rounded-lg border border-gray-600 bg-gray-800 text-gray-100 placeholder-gray-500 px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+        [class.border-red-500]="titleModel.invalid && titleModel.touched"
+      />
+      <p *ngIf="titleModel.invalid && titleModel.touched" class="mt-1 text-sm text-yellow-400">
+        Título inválido (mínimo 5 caracteres).
+      </p>
+    </div>
+
+    <!-- Slug -->
+    <div>
+      <label for="slug" class="block text-sm font-medium text-gray-300 mb-2">URL Amigável (Slug)</label>
+      <div class="relative">
+        <input
+          id="slug"
+          name="slug"
+          #slugModel="ngModel"
+          [(ngModel)]="model().slug"
+          (ngModelChange)="onSlugChange($event)"
+          pattern="^[a-z0-9-]+$"
+          required
+          placeholder="ex: curso-de-extensao"
+          class="w-full rounded-lg border border-gray-600 bg-gray-800 text-gray-100 placeholder-gray-500 px-4 py-2.5 font-mono text-sm pr-24 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+          [class.border-red-500]="slugModel.invalid && slugModel.touched"
+        />
+        <button
+          type="button"
+          class="absolute right-2 top-1/2 -translate-y-1/2 bg-gray-700 hover:bg-gray-600 text-gray-100 text-xs px-3 py-1.5 rounded-md border border-gray-600 transition"
+          (click)="generateSlug(true)"
+        >
+          Gerar
+        </button>
+      </div>
+      <p *ngIf="slugModel.invalid && slugModel.touched" class="mt-1 text-sm text-yellow-400">
+        Slug inválido (use apenas letras minúsculas, números e hífens).
+      </p>
+    </div>
+  </div>
+
+  <!-- Comissão -->
+  <div>
+    <label for="commissionId" class="block text-sm font-medium text-gray-300 mb-2">Comissão Organizadora</label>
+    <select
+      id="commissionId"
+      name="commissionId"
+      #commissionModel="ngModel"
+      [(ngModel)]="model().commissionId"
+      required
+      class="w-full rounded-lg border border-gray-600 bg-gray-800 text-gray-100 placeholder-gray-500 px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+      [class.border-red-500]="commissionModel.invalid && commissionModel.touched"
+    >
+      <option value="" disabled>Selecione uma comissão</option>
+      @for (commission of commissions(); track commission.id) {
+        @if (commission.isFormationCommission) {
+          <option [value]="commission.id">{{ commission.name }}</option>
+        }
+      }
+    </select>
+    <p *ngIf="commissionModel.invalid && commissionModel.touched" class="mt-1 text-sm text-yellow-400">
+      Selecione uma comissão válida.
+    </p>
+  </div>
+
+  <!-- Descrição -->
+  <div>
+    <label for="description" class="block text-sm font-medium text-gray-300 mb-2">Descrição</label>
+    <textarea
+      id="description"
+      name="description"
+      rows="5"
+      [(ngModel)]="model().description"
+      (ngModelChange)="onDescriptionChange($event)"
+      placeholder="Escreva uma breve descrição do curso..."
+      class="w-full rounded-lg border border-gray-600 bg-gray-800 text-gray-100 placeholder-gray-500 px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition resize-none"
+    ></textarea>
+  </div>
+
+<div class="divider text-gray-300/80">Pontos de Destaque <span class="text-gray-400 text-sm">(O que você vai aprender?)</span></div>
+
+<div class="space-y-5 animate-fade-in">
+  @for (objective of model().learningObjectives; track $index) {
+    <div
+      class="relative rounded-xl border border-gray-700/70 bg-gray-800/60 p-5 shadow-md hover:shadow-lg hover:border-primary/50 transition-all duration-300 animate-fade-in"
+    >
+      <!-- Botão Remover -->
+      <button
+        type="button"
+        (click)="removeObjective($index)"
+        class="absolute top-3 right-3 text-gray-400 hover:text-red-400 transition"
+        title="Remover este ponto"
+      >
+        ✕
+      </button>
+
+      <!-- Campos principais -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- Ícone -->
+        <div class="form-control">
+          <label class="block text-sm font-medium text-gray-200 mb-1">
+            Ícone do Ponto {{ $index + 1 }}
+          </label>
+          <select
+            name="objectiveIcon{{ $index }}"
+            [(ngModel)]="objective.icon"
+            class="w-full rounded-lg border border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-400 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+          >
+            <option value="">Selecione um ícone</option>
+            @for (icon of availableIcons; track icon.name) {
+              <option [value]="icon.name">{{ icon.label }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Título -->
+        <div class="form-control">
+          <label class="block text-sm font-medium text-gray-200 mb-1">
+            Título do Ponto {{ $index + 1 }}
+          </label>
+          <input
+            name="objectiveTitle{{ $index }}"
+            [(ngModel)]="objective.title"
+            type="text"
+            placeholder="Ex: Introdução ao tema"
+            class="w-full rounded-lg border border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-400 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+          />
+        </div>
+      </div>
+
+      <!-- Descrição -->
+      <div class="form-control mt-4">
+        <label class="block text-sm font-medium text-gray-200 mb-1">
+          Descrição do Ponto {{ $index + 1 }}
+        </label>
+        <textarea
+          name="objectiveDesc{{ $index }}"
+          [(ngModel)]="objective.description"
+          rows="2"
+          placeholder="Descreva brevemente o que será aprendido..."
+          class="w-full rounded-lg border border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-400 px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+        ></textarea>
+      </div>
+    </div>
+  }
+
+  <!-- Botão de adicionar -->
+  <button
+    type="button"
+    (click)="addObjective()"
+    class="w-full flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-700 text-gray-300 bg-gray-800/40 hover:bg-gray-700/60 hover:text-white hover:border-primary/60 py-3 transition-all duration-300 shadow-sm hover:shadow-md"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" class="w-5 h-5">
+      <path
+        fill-rule="evenodd"
+        d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"
+        clip-rule="evenodd"
+      />
+    </svg>
+    <span class="font-medium">Adicionar Ponto de Destaque</span>
+  </button>
+</div>
+
+<style>
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fade-in {
+    animation: fade-in 0.35s ease-out forwards;
+  }
+</style>
+
+
+  <!-- Público -->
+  <div class="flex items-center gap-3 pt-4 border-t border-gray-700">
+    <label for="isPublic" class="text-sm font-medium text-gray-200">Tornar Página Pública?</label>
+    <input
+      id="isPublic"
+      name="isPublic"
+      type="checkbox"
+      [(ngModel)]="model().isPublic"
+      class="toggle toggle-primary"
+    />
+  </div>
+</div>
+
+          }
+
+          @if (activeTab() === 'content') {
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
+              <div class="card bg-base-200"><div class="card-body">
+                <div class="card-title justify-between items-center"><h2>Cronograma</h2>
+                  <button type="button" (click)="onNewScheduleItem()" class="btn btn-primary btn-sm">Novo Item</button>
+                </div>
+                <div class="space-y-2 mt-4 max-h-72 overflow-y-auto">
+                  @for (item of scheduleItems(); track item.id) { <div class="flex justify-between items-center p-2 rounded-lg hover:bg-base-300/50">
+                    <div><p class="font-semibold">{{ item.title }}</p><p class="text-xs opacity-60">{{ item.startTime.toDate() | date:'short' }}</p></div>
+                    <button type="button" (click)="onEditScheduleItem(item)" class="btn btn-ghost btn-xs">Editar</button>
+                  </div> } @empty { <div class="p-4 text-sm text-center opacity-60">Nenhum item no cronograma.</div> }
+                </div>
+              </div></div>
+              <div class="card bg-base-200"><div class="card-body">
+                <div class="card-title justify-between items-center"><h2>Palestrantes</h2>
+                  <button type="button" (click)="onNewSpeaker()" class="btn btn-primary btn-sm">Novo</button>
+                </div>
+                <div class="space-y-2 mt-4 max-h-72 overflow-y-auto">
+                  @for (speaker of speakers(); track speaker.id) { <div class="flex justify-between items-center p-2 rounded-lg hover:bg-base-300/50">
+                    <span class="font-semibold">{{ speaker.name }}</span>
+                    <button type="button" (click)="onEditSpeaker(speaker)" class="btn btn-ghost btn-xs">Editar</button>
+                  </div> } @empty { <div class="p-4 text-sm text-center opacity-60">Nenhum palestrante cadastrado.</div> }
+                </div>
+              </div></div>
+            </div>
+          }
+
+          @if (activeTab() === 'location') {
+            <div class="space-y-4 animate-fade-in">
+              <div class="form-control"><label class="label"><span class="label-text">Tipo de Local</span></label>
+                <div class="join">
+                  <button type="button" class="btn join-item" [class.btn-primary]="model().locationType === 'physical'" (click)="setLocationType('physical')">Presencial</button>
+                  <button type="button" class="btn join-item" [class.btn-primary]="model().locationType === 'virtual'" (click)="setLocationType('virtual')">Virtual</button>
+                  <button type="button" class="btn join-item" [class.btn-primary]="model().locationType === 'tbd'" (click)="setLocationType('tbd')">A Definir</button>
+                </div>
+              </div>
+              @if (model().locationType === 'physical') { <div class="form-control"><label class="label"><span class="label-text">Endereço Completo</span></label>
+                <input name="address" [(ngModel)]="model().address" (ngModelChange)="updateAddress($event)" class="input input-bordered" placeholder="Rua Exemplo, 123..." />
+              </div> }
+              @if (model().locationType === 'virtual') { <div class="form-control"><label class="label"><span class="label-text">Link da Reunião</span></label>
+                <input name="virtualLink" #linkModel="ngModel" [(ngModel)]="model().virtualLink" (ngModelChange)="updateVirtualLink($event)" type="url" pattern="https?://.+"
+                       class="input input-bordered" [class.input-error]="linkModel.invalid && linkModel.touched" placeholder="https://..." />
+                <div class="label"><span class="label-text-alt text-error" *ngIf="linkModel.invalid && linkModel.touched">Insira uma URL válida.</span></div>
+              </div> }
+            </div>
+          }
+          @if (activeTab() === 'registrations') {
+        <div class="space-y-4 animate-fade-in">
+          <div class="flex justify-between items-center">
+            <h2 class="text-xl font-bold">Participantes Inscritos</h2>
+            <button class="btn btn-sm">
+              <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.25a.75.75 0 00-1.5 0v4.59L7.3 9.24a.75.75 0 00-1.1 1.02l3.25 3.5a.75.75 0 001.1 0l3.25-3.5a.75.75 0 10-1.1-1.02l-1.95 2.1V6.75z" clip-rule="evenodd" /></svg>
+              Exportar CSV
+            </button>
+          </div>
+          <div class="overflow-x-auto max-h-96">
+            <table class="table table-zebra table-pin-rows">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>E-mail</th>
+                  <th>Data da Inscrição</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (registration of registrations(); track registration.id) {
+                  <tr>
+                    <td>{{ registration.name }}</td>
+                    <td>{{ registration.email }}</td>
+                    <td>{{ registration.registeredAt.toDate() | date:'medium' }}</td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="3" class="text-center p-8">Nenhuma inscrição até o momento.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+        @if (activeTab() === 'actions') {
+            <div class="space-y-6 animate-fade-in">
+              <h2 class="text-xl font-bold">Ferramentas de Divulgação</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                <div class="card bg-base-200/50 p-6 items-center text-center">
+       @if (publicCourseUrl()) {
+  <h3 class="font-bold mb-4">QR Code para Inscrição Rápida</h3>
+  <div class="bg-white p-4 rounded-lg shadow-md flex flex-col items-center">
+    <qrcode
+      [qrdata]="publicCourseUrl()!"
+      [width]="200"
+      [errorCorrectionLevel]="'M'"
+      [elementType]="'canvas'"
+      (qrCodeURL)="onChangeQRUrl($event)">
+    </qrcode>
+
+    <button
+      type="button"
+      class="btn btn-secondary btn-sm mt-4"
+      [disabled]="!qrCodeDownloadLink"
+      (click)="downloadQRCode()">
+      Baixar PNG
+    </button>
+
+    <p class="text-xs opacity-60 mt-2 text-center">
+      Use este código em materiais impressos.
+    </p>
+  </div>
+} @else {
+                    <p>Salve o curso com um "Slug" e marque-o como "Público" para gerar o QR Code.</p>
+                  }
+                </div>
+                <div class="card bg-base-200/50 p-6 items-center text-center">
+                  @if (publicCourseUrl()) {
+                    <h3 class="font-bold mb-4">Link da Página Pública</h3>
+                    <input type="text" [value]="publicCourseUrl()" readonly class="input input-bordered w-full" />
+                    <p class="text-xs opacity-60 mt-4">Copie e compartilhe este link nas suas redes sociais, e-mails ou grupos de WhatsApp.</p>
+                  } @else {
+                    <p>Salve o curso com um "Slug" e marque-o como "Público" para gerar o link de compartilhamento.</p>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
+        </div>
+
+        <div *ngIf="errorMessage()" role="alert" class="alert alert-error mt-6">
+          <span>{{ errorMessage() }}</span>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  @if (isSpeakerFormVisible()) { <app-speaker-form [speakerToEdit]="editingSpeaker()!" (close)="onCloseSpeakerForm()"></app-speaker-form> }
+  @if (isScheduleFormVisible()) { <app-schedule-form [courseId]="courseId()!" [itemToEdit]="editingScheduleItem()!" (close)="onCloseScheduleForm()"></app-schedule-form> }
+</div>

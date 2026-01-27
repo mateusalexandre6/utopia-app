@@ -1,0 +1,203 @@
+@if (isLoading()) {
+  <div class="space-y-6 animate-pulse">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="h-28 bg-gray-700 rounded-lg"></div>
+      <div class="h-28 bg-gray-700 rounded-lg"></div>
+      <div class="h-28 bg-gray-700 rounded-lg"></div>
+      <div class="h-28 bg-gray-700 rounded-lg"></div>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="h-96 bg-gray-700 rounded-lg lg:col-span-2"></div>
+      <div class="h-96 bg-gray-700 rounded-lg"></div>
+    </div>
+  </div>
+} @else {
+  <div class="animate-fade-in space-y-8">
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="group p-5 bg-gray-800 border border-gray-700 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:border-primary/50">
+        <div class="flex items-center justify-between mb-3">
+          <div class="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-primary" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 3l8.485 8.485-1.414 1.414L12 5.828l-7.071 7.071L3.515 11.485 12 3z" />
+              <path d="M12 10l6.364 6.364-1.414 1.414L12 12.828l-4.95 4.95-1.414-1.414L12 10z" />
+            </svg>
+          </div>
+        </div>
+        <p class="text-sm text-gray-400">Núcleos Ativos</p>
+        <p class="text-3xl font-bold text-gray-100">{{ nucleiCount() }}</p>
+        <p class="text-xs text-gray-500">Organizações estaduais</p>
+      </div>
+
+      <div class="group p-5 bg-gray-800 border border-gray-700 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:border-secondary/50">
+        <div class="flex items-center justify-between mb-3">
+          <div class="p-2 bg-secondary/10 rounded-lg group-hover:bg-secondary/20 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-secondary" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-7 9a7 7 0 0114 0H5z" />
+            </svg>
+          </div>
+        </div>
+        <p class="text-sm text-gray-400">Membros</p>
+        <p class="text-3xl font-bold text-gray-100">{{ memberCount() }}</p>
+        <p class="text-xs text-gray-500">Usuários cadastrados</p>
+      </div>
+
+      <div class="group p-5 bg-gray-800 border border-gray-700 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:border-accent/50">
+        <div class="flex items-center justify-between mb-3">
+          <div class="p-2 bg-accent/10 rounded-lg group-hover:bg-accent/20 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-accent" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10.75 2.75a.75.75 0 00-1.5 0v8.586l-1.97-1.97a.75.75 0 00-1.06 1.06l3.5 3.5a.75.75 0 001.06 0l3.5-3.5a.75.75 0 00-1.06-1.06l-1.97 1.97V2.75z" />
+              <path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
+            </svg>
+          </div>
+        </div>
+        <p class="text-sm text-gray-400">Cursos Disponíveis</p>
+        <p class="text-3xl font-bold text-gray-100">{{ courseCount() }}</p>
+        <p class="text-xs text-gray-500">Na plataforma de formação</p>
+      </div>
+
+      <div class="group p-5 bg-gray-800 border border-gray-700 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:border-info/50">
+        <div class="flex items-center justify-between mb-3">
+          <div class="p-2 bg-info/10 rounded-lg group-hover:bg-info/20 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-info" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zM2 9.75A.75.75 0 012.75 9h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 9.75zM2 14.75a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
+            </svg>
+          </div>
+        </div>
+        <p class="text-sm text-gray-400">Tarefas Ativas</p>
+        <p class="text-3xl font-bold text-gray-100">{{ taskCount() }}</p>
+        <p class="text-xs text-gray-500">Atribuídas às comissões</p>
+      </div>
+    </div>
+
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <div class="bg-gray-800 border border-gray-700 rounded-xl shadow-lg lg:col-span-2 p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-100 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18"/>
+            </svg>
+            Atividades Recentes
+          </h3>
+          <span class="text-sm text-gray-500">Últimos 30 dias</span>
+        </div>
+
+      <div class="h-72 w-full relative mt-6">
+          <canvas baseChart
+                  [data]="barChartData()"
+                  [options]="barChartOptions"
+                  type="bar">
+          </canvas>
+        </div>
+
+        <div class="mt-6">
+          <table class="min-w-full text-sm">
+            <thead class="text-gray-400 border-b border-gray-700">
+              <tr>
+                <th class="text-left py-2 px-2">Evento</th>
+                <th class="text-left py-2 px-2">Comissão</th>
+                <th class="text-left py-2 px-2">Data</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-700">
+              @for (activity of latestActivities(); track activity.id) {
+                <tr class="hover:bg-gray-750 transition">
+                  <td class="py-2 px-2 text-gray-100 font-medium">{{ activity.title }}</td>
+                  <td class="py-2 px-2 text-gray-400">{{ activity.commissionName }}</td>
+                  <td class="py-2 px-2 text-gray-300">{{ activity.date.toDate() | date: 'dd/MM/yy' }}</td>
+                </tr>
+              } @empty {
+                <tr><td colspan="3" class="text-center text-gray-500 py-6">Nenhum evento recente.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <div class="bg-gray-800 border border-gray-700 rounded-xl shadow-lg p-6">
+          <h3 class="text-lg font-semibold text-gray-100 mb-4">Próximos Eventos</h3>
+          <div class="space-y-3">
+            @for (activity of upcomingActivities(); track activity.id) {
+              <div class="p-3 bg-gray-700 rounded-lg hover:bg-primary/20 transition">
+                <p class="font-medium text-gray-100">{{ activity.title }}</p>
+                <p class="text-sm text-gray-400">{{ activity.date.toDate() | date: 'fullDate' }}</p>
+              </div>
+            } @empty {
+              <p class="text-gray-400 text-sm">Nenhum evento agendado.</p>
+            }
+          </div>
+        </div>
+
+        <div class="bg-gray-800 border border-gray-700 rounded-xl shadow-lg p-6">
+          <h3 class="text-lg font-semibold text-gray-100 mb-4">Fórum: Tópicos Recentes</h3>
+          <div class="space-y-3">
+            @for (topic of latestTopics(); track topic.id) {
+              <a (click)="navigateToTopic(topic.id)"
+                 class="block p-3 bg-gray-700 rounded-lg hover:bg-secondary/20 transition cursor-pointer group">
+                <p class="font-medium text-gray-100 group-hover:text-secondary transition-colors">{{ topic.title }}</p>
+                <p class="text-sm text-gray-400">por {{ topic.authorName }}</p>
+              </a>
+            } @empty {
+              <p class="text-gray-400 text-sm">Nenhum tópico no fórum ainda.</p>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fixed bottom-8 right-8 z-50">
+      <div class="dropdown dropdown-top dropdown-end">
+
+        <div tabindex="0" role="button"
+            class="btn btn-primary btn-circle btn-lg shadow-xl transition-transform duration-300 ease-in-out hover:scale-110 active:scale-95 group">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
+              class="w-7 h-7 transition-transform duration-300 ease-in-out group-focus-within:rotate-45">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+        </div>
+
+        <ul tabindex="0"
+            class="dropdown-content menu p-2 shadow-2xl bg-base-200 border border-base-300/20 rounded-box w-64 space-y-1 mb-3">
+
+          <li class="animate-menu-item" style="animation-delay: 50ms;">
+            <a (click)="onNewActivity()">
+              <svg class="w-5 h-5 text-info" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c0-.414.336-.75.75-.75h10.5a.75.75 0 010 1.5H5.5a.75.75 0 01-.75-.75z" clip-rule="evenodd" /></svg>
+              Adicionar Atividade
+            </a>
+          </li>
+          <li class="animate-menu-item" style="animation-delay: 100ms;">
+            <a (click)="onNewTask()">
+              <svg class="w-5 h-5 text-success" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4zm2.5 4.5a.75.75 0 000 1.5h7a.75.75 0 000-1.5h-7zm0 3.5a.75.75 0 000 1.5h7a.75.75 0 000-1.5h-7zm0 3.5a.75.75 0 000 1.5h4a.75.75 0 000-1.5h-4z" clip-rule="evenodd" /></svg>
+              Adicionar Tarefa
+            </a>
+          </li>
+          <li class="animate-menu-item" style="animation-delay: 150ms;">
+            <a (click)="navigateToNewCourse()">
+              <svg class="w-5 h-5 text-accent" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M7.875 3.682a.75.75 0 000 1.06l5.25 5.25a.75.75 0 001.06-1.06l-5.25-5.25a.75.75 0 00-1.06 0z" /><path d="M6.328 4.23a.75.75 0 00-1.056 1.06l5.25 5.25a.75.75 0 001.06-1.06l-5.25-5.25zM2 9a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 9z" /><path d="M3.5 12.5a.75.75 0 000 1.5h4.81l-1.28 1.28a.75.75 0 001.06 1.06l2.5-2.5a.75.75 0 000-1.06l-2.5-2.5a.75.75 0 10-1.06 1.06l1.28 1.28H3.5z" /><path d="M10 17c-4.418 0-8-2.015-8-4.5V12h16v.5c0 2.485-3.582 4.5-8 4.5z" /></svg>
+              Adicionar Curso
+            </a>
+          </li>
+          <div class="divider my-1"></div>
+          <li class="animate-menu-item" style="animation-delay: 200ms;">
+            <a (click)="navigateToAdmin()">
+              <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.947 1.517l-.273 1.09a.75.75 0 00.318.845l.95.475a.75.75 0 01.46.903l-.337 1.348a.75.75 0 00.56.918l1.32.33a.75.75 0 01.62.69l.178 1.423a.75.75 0 00.97.713l1.268-.317a.75.75 0 01.8.401l.732 1.464a.75.75 0 001.322-.662l-.248-1.243a.75.75 0 01.21-.69l.791-.792a.75.75 0 00-.2-1.238l-1.338-.668a.75.75 0 01-.48-.82l.2-1.198a.75.75 0 00-.52-.828l-1.267-.422a.75.75 0 01-.61-.749l-.088-1.32a.75.75 0 00-.83-.678l-1.09.272a.75.75 0 01-.845-.318l-.547-1.094A1.99 1.99 0 0011.078 2.25zM8.922 4.26a.75.75 0 01.83.678l.088 1.32a.75.75 0 00.61.75l1.267.422a.75.75 0 01.52.828l-.2 1.198a.75.75 0 00.48.82l1.338.668a.75.75 0 01.2 1.238l-.79.792a.75.75 0 00-.21.69l.248 1.243a.75.75 0 01-1.323.662l-.732-1.464a.75.75 0 00-.8-.401l-1.268.317a.75.75 0 01-.97-.713l-.178-1.423a.75.75 0 00-.62-.69l-1.32-.33a.75.75 0 01-.56-.918l.337-1.348a.75.75 0 00-.46-.903l-.95-.475a.75.75 0 01-.318-.845l.273-1.09A1.99 1.99 0 018.922 4.25z" clip-rule="evenodd" /></svg>
+              Gerenciamento
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    @if (isActivityFormVisible()) {
+      <app-activity-form (close)="onCloseActivityForm()"></app-activity-form>
+    }
+
+    @if (isTaskFormVisible()) {
+      <app-task-form (close)="onCloseTaskForm()"></app-task-form>
+    }
+
+  </div>
+}

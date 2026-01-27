@@ -1,0 +1,126 @@
+<dialog class="modal modal-open bg-black/40 backdrop-blur-sm transition-all duration-300 ease-out">
+  <div class="modal-box w-11/12 max-w-2xl p-8 relative transform transition-all duration-300 bg-gray-800/95 backdrop-blur rounded-2xl shadow-2xl border border-gray-700 animate-modal-in">
+
+    <!-- Cabeçalho -->
+    <div class="mb-5">
+      <h3 class="font-semibold text-xl flex items-center gap-2 text-primary transition-all duration-200">
+        <span class="inline-block w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+        @if (isEditMode) { Editar Comissão } @else { Nova Comissão }
+      </h3>
+      <p class="text-gray-300 text-sm mt-1">
+        @if (isEditMode) { Atualize os detalhes da comissão existente. }
+        @else { Crie uma nova comissão e defina suas responsabilidades. }
+      </p>
+    </div>
+
+    <!-- Formulário -->
+    <form (ngSubmit)="onSave()" class="space-y-6">
+
+      <!-- Nome da Comissão -->
+      <div class="form-control group">
+        <label class="label">
+          <span class="label-text font-medium text-gray-200">Nome da Comissão</span>
+        </label>
+        <input
+          [(ngModel)]="model.name"
+          name="name"
+          type="text"
+          required
+          placeholder="Ex: Comissão de Finanças"
+          class="w-full px-4 py-3 rounded-xl border border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition duration-200 group-hover:shadow-sm"
+          [class.border-red-500]="!model.name && errorMessage"
+        />
+        <span *ngIf="!model.name && errorMessage" class="text-red-400 text-sm mt-1 animate-fade-in">
+          Campo obrigatório
+        </span>
+      </div>
+
+      <!-- Núcleo -->
+      <div class="form-control group">
+        <label class="label">
+          <span class="label-text font-medium text-gray-200">Núcleo (Organização)</span>
+        </label>
+        <select
+          [(ngModel)]="model.organizationId"
+          name="organizationId"
+          required
+          class="w-full px-4 py-3 rounded-xl border border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition duration-200 group-hover:shadow-sm"
+        >
+          <option disabled selected value="">Selecione o núcleo ao qual pertence</option>
+          @for (org of organizations(); track org.id) {
+            <option [value]="org.id">{{ org.name }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Descrição -->
+      <div class="form-control group">
+        <label class="label">
+          <span class="label-text font-medium text-gray-200">Descrição (Opcional)</span>
+        </label>
+        <textarea
+          [(ngModel)]="model.description"
+          name="description"
+          placeholder="Responsabilidades da comissão..."
+          class="w-full px-4 py-3 rounded-xl border border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-400 min-h-[90px] focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition duration-200 group-hover:shadow-sm"
+        ></textarea>
+      </div>
+
+      <!-- Comissão de Formação -->
+      <div class="form-control">
+        <label class="label cursor-pointer flex items-center gap-2">
+          <span class="label-text text-gray-200">É uma Comissão de Formação?</span>
+          <input type="checkbox" class="toggle toggle-primary" [(ngModel)]="model.isFormationCommission" name="isFormationCommission" />
+        </label>
+        <div class="text-xs text-gray-400 px-1 mt-1">
+          Marcar esta opção habilitará o módulo de gerenciamento de cursos para esta comissão.
+        </div>
+      </div>
+
+      <!-- Erro -->
+      <div *ngIf="errorMessage" role="alert" class="p-3 bg-yellow-900/30 border border-yellow-600 text-yellow-300 rounded-lg text-sm animate-fade-in">
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <!-- Ações -->
+      <div class="modal-action mt-6 flex justify-end gap-3">
+        <button
+          type="button"
+          (click)="close.emit()"
+          class="px-4 py-2 rounded-xl text-gray-200 bg-gray-700 hover:bg-gray-600 transition-all duration-200 hover:scale-105 active:scale-95"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="px-4 py-2 rounded-xl bg-primary text-gray-900 font-semibold flex items-center gap-2 transition-all duration-200 hover:scale-105 active:scale-95"
+          [disabled]="isLoading"
+        >
+          <span *ngIf="isLoading" class="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900 mr-2 inline-block"></span>
+          Salvar
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Fundo clicável -->
+  <form method="dialog" class="modal-backdrop" (click)="close.emit()">
+    <button hidden>close</button>
+  </form>
+</dialog>
+
+<!-- Microanimações -->
+<style>
+  @keyframes modal-in {
+    from { opacity: 0; transform: translateY(10px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .animate-modal-in { animation: modal-in 0.3s ease-out forwards; }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in { animation: fade-in 0.25s ease-out forwards; }
+</style>

@@ -1,0 +1,124 @@
+<dialog class="modal modal-open">
+  <div class="modal-box max-w-2xl rounded-2xl bg-gray-800 text-gray-100 shadow-xl">
+    <!-- Cabeçalho -->
+    <div class="flex items-center justify-between mb-2">
+      <h3 class="text-lg font-semibold text-white">
+        @if (isEditMode) { Editar Item do Cronograma } @else { Novo Item do Cronograma }
+      </h3>
+      <button
+        (click)="close.emit()"
+        class="btn btn-sm btn-circle btn-ghost text-gray-300 hover:text-white hover:bg-gray-700 transition"
+        aria-label="Fechar"
+      >
+        ✕
+      </button>
+    </div>
+
+    <!-- Formulário -->
+    <form (ngSubmit)="onSave()" class="space-y-6 mt-4">
+      <!-- Título -->
+      <div>
+        <label for="title" class="block text-sm font-medium text-gray-200 mb-1">Título da Sessão</label>
+        <input
+          id="title"
+          name="title"
+          type="text"
+          [(ngModel)]="model.title"
+          required
+          placeholder="Digite o título da sessão"
+          class="w-full rounded-lg border border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-400 px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+        />
+      </div>
+
+      <!-- Início e Fim -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label for="startTime" class="block text-sm font-medium text-gray-200 mb-1">Início</label>
+          <input
+            id="startTime"
+            name="startTime"
+            type="datetime-local"
+            [(ngModel)]="model.startTime"
+            required
+            class="w-full rounded-lg border border-gray-600 bg-gray-700 text-gray-100 px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+          />
+        </div>
+        <div>
+          <label for="endTime" class="block text-sm font-medium text-gray-200 mb-1">Fim</label>
+          <input
+            id="endTime"
+            name="endTime"
+            type="datetime-local"
+            [(ngModel)]="model.endTime"
+            required
+            class="w-full rounded-lg border border-gray-600 bg-gray-700 text-gray-100 px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+          />
+        </div>
+      </div>
+
+      <!-- Palestrantes -->
+      <div>
+        <label class="block text-sm font-medium text-gray-200 mb-1">Palestrante(s)</label>
+        <div class="border border-gray-600 bg-gray-700 rounded-lg p-3 h-40 overflow-y-auto space-y-1">
+          @for (speaker of speakers(); track speaker.id) {
+            <label
+              class="flex justify-between items-center px-2 py-1 rounded-md cursor-pointer hover:bg-gray-600 transition"
+            >
+              <span class="text-sm text-gray-100">{{ speaker.name }}</span>
+              <input
+                type="checkbox"
+                class="checkbox checkbox-primary"
+                [checked]="isSpeakerSelected(speaker.id)"
+                (change)="toggleSpeakerSelection(speaker.id)"
+              />
+            </label>
+          }
+        </div>
+      </div>
+
+      <!-- Descrição -->
+      <div>
+        <label for="description" class="block text-sm font-medium text-gray-200 mb-1">Descrição</label>
+        <textarea
+          id="description"
+          name="description"
+          rows="4"
+          [(ngModel)]="model.description"
+          placeholder="Descreva brevemente o conteúdo da sessão..."
+          class="w-full rounded-lg border border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-400 px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition resize-none"
+        ></textarea>
+      </div>
+
+      <!-- Mensagem de erro -->
+      @if (errorMessage) {
+        <div role="alert" class="rounded-lg bg-yellow-900/30 border border-yellow-600 text-yellow-300 px-4 py-2 text-sm">
+          <span>{{ errorMessage }}</span>
+        </div>
+      }
+    </form>
+
+    <!-- Ações -->
+    <div class="modal-action mt-6 flex justify-end gap-3">
+      <button
+        (click)="close.emit()"
+        type="button"
+        class="btn btn-ghost text-gray-300 hover:text-white hover:bg-gray-700 transition"
+      >
+        Cancelar
+      </button>
+      <button
+        (click)="onSave()"
+        type="submit"
+        class="btn btn-primary px-6"
+        [disabled]="isLoading"
+      >
+        @if(isLoading) { <span class="loading loading-spinner"></span> } Salvar
+      </button>
+    </div>
+  </div>
+
+  <!-- Fundo -->
+  <form method="dialog" class="modal-backdrop" (click)="close.emit()">
+    <button>close</button>
+  </form>
+</dialog>

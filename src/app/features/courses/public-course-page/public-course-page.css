@@ -1,0 +1,28 @@
+/* src/app/features/courses/public-course-page/public-course-page.component.css */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+.abstract-background {
+    /* Cor de fundo base */
+    background-color: #f8fafc; /* Equivalente a bg-slate-50 */
+
+    /* Combinação de gradientes para o efeito abstrato */
+    background-image:
+        /* Gradiente radial (ponto de luz suave no canto superior esquerdo) */
+        radial-gradient(
+            ellipse at top left,
+            #f1f5f9 0%, /* Equivalente a slate-100 */
+            transparent 50%
+        ),
+        /* Gradiente linear (forma diagonal sutil) */
+        linear-gradient(
+            to bottom right,
+            #eff6ff 0%, /* Equivalente a blue-50 */
+            transparent 50%
+        );
+}

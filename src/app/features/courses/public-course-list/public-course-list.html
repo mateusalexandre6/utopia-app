@@ -1,0 +1,62 @@
+<div class="min-h-screen bg-slate-50 font-sans text-slate-800 abstract-background">
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200/80">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <a href="https://movaut.com.br" class="text-2xl font-serif font-bold text-blue-700">Movaut</a>
+      <a routerLink="/" class="text-sm text-blue-600 hover:underline">Voltar</a>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-16 space-y-24 animate-fade-in-up">
+    <section>
+      <h2 class="font-serif text-4xl font-bold mb-10 text-slate-800 text-center">📅 Próximos Cursos</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        @for(course of upcomingCourses(); track course.id) {
+          <a [routerLink]="['/curso', course.slug]"
+             class="block bg-white rounded-xl shadow-md hover:shadow-lg transition p-6 border border-slate-200">
+            <h3 class="text-2xl font-serif font-semibold mb-2">{{ course.title }}</h3>
+            <p class="text-slate-600 mb-4">{{ course.description }}</p>
+            <p class="text-sm text-blue-600 font-medium">
+              {{ course.startDate | date:'longDate':'':'pt-BR' }}
+            </p>
+          </a>
+        } @empty {
+          <p class="text-center text-slate-500">Nenhum curso futuro no momento.</p>
+        }
+      </div>
+    </section>
+
+    <section>
+      <h2 class="font-serif text-4xl font-bold mb-10 text-slate-800 text-center">🕰️ Cursos Passados</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        @for(course of pastCourses(); track course.id) {
+          <a [routerLink]="['/curso', course.slug]"
+             class="block bg-white rounded-xl shadow-sm hover:shadow-md transition p-6 border border-slate-200">
+            <h3 class="text-xl font-serif font-semibold mb-2">{{ course.title }}</h3>
+            <p class="text-slate-600 mb-4">{{ course.description }}</p>
+            <p class="text-sm text-slate-500">
+              Realizado em {{ course.startDate | date:'longDate':'':'pt-BR' }}
+            </p>
+          </a>
+        } @empty {
+          <p class="text-center text-slate-500">Nenhum curso passado disponível.</p>
+        }
+      </div>
+    </section>
+
+    <section class="text-center">
+      <h2 class="font-serif text-4xl font-bold mb-8 text-slate-800">🔗 Principais Links</h2>
+      <div class="flex flex-wrap justify-center gap-6">
+        @for(link of organizationLinks; track link.name) {
+          <a [href]="link.url" target="_blank" rel="noopener noreferrer"
+             class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+            {{ link.name }}
+          </a>
+        }
+      </div>
+    </section>
+  </main>
+
+  <footer class="py-10 text-center text-slate-500 border-t border-slate-200">
+    <p>© {{ '2025' }} Movaut — Todos os direitos reservados.</p>
+  </footer>
+</div>

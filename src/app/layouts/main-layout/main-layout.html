@@ -1,0 +1,91 @@
+<div class="drawer lg:drawer-open min-h-screen bg-base-200">
+  <input id="app-drawer" type="checkbox" class="drawer-toggle" />
+
+  <div class="drawer-content flex flex-col">
+
+    <nav class="navbar sticky top-0 z-30 bg-base-100/90 backdrop-blur-md border-b border-base-300 px-4 shadow-sm">
+      <div class="flex-none lg:hidden">
+        <label for="app-drawer" aria-label="open sidebar" class="btn btn-square btn-ghost">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </label>
+      </div>
+
+      <div class="flex-1"></div>
+
+      @if (currentUser(); as user) {
+        <div class="dropdown dropdown-end">
+          <label tabindex="0" class="btn btn-ghost btn-circle avatar transition-transform duration-200 hover:scale-105 active:scale-95">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent text-accent-content flex items-center justify-center font-bold">
+              <span>{{ user.email?.charAt(0)?.toUpperCase() }}</span>
+            </div>
+          </label>
+          <ul tabindex="0" class="dropdown-content menu p-2 shadow-xl bg-base-100 rounded-box w-56 mt-4 border border-base-300 animate-fade-in">
+            <li class="p-2 border-b border-base-300/20 text-sm opacity-70">{{ user.email }}</li>
+            <li>
+              <a class="flex items-center gap-2 text-base-content hover:text-accent transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A9 9 0 1118.88 6.196 9 9 0 015.12 17.804z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Perfil
+              </a>
+            </li>
+            <li>
+              <a (click)="handleLogout()" class="flex items-center gap-2 text-error hover:text-error-focus transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Sair
+              </a>
+            </li>
+          </ul>
+        </div>
+      }
+    </nav>
+
+    <main class="flex-grow p-6 animate-fade-in">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+  <aside class="drawer-side">
+    <label for="app-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+    <div class="p-4 w-64 lg:w-72 min-h-screen bg-base-100 border-r border-base-300 flex flex-col">
+
+      <a routerLink="/" class="text-2xl font-extrabold text-primary p-4 flex items-center gap-3 hover:opacity-90 transition-opacity">
+        <img src="apple-touch-icon.png" alt="Logo Utopia" class="w-25 h-25" />
+
+      </a>
+
+      <nav class="flex-grow mt-2 overflow-y-auto" aria-label="Main navigation">
+        <ul class="space-y-1 px-2">
+          @for (item of navItems; track item.route) {
+            <li role="none">
+              <a
+                [routerLink]="item.route"
+                #rla="routerLinkActive"
+                routerLinkActive=""
+                [routerLinkActiveOptions]="{ exact: item.exact ?? true }"
+                [ngClass]="{
+                  'bg-secondary/10 text-primary shadow-sm font-extrabold': rla.isActive,
+                  'text-base-content': !rla.isActive
+                }"
+                [attr.aria-current]="rla.isActive ? 'page' : null"
+                class="group flex items-center gap-3 py-3 px-4 rounded-lg w-full block hover:bg-secondary hover:text-primary hover:shadow transition-all transform hover:-translate-y-0.5"
+              >
+                <span class="icon w-5 h-5 flex-shrink-0" [innerHTML]="item.icon | safeHtml"></span>
+                <span class="truncate">{{ item.label }}</span>
+              </a>
+            </li>
+          }
+        </ul>
+      </nav>
+
+      <div class="p-4 text-center text-xs opacity-50">
+        &copy; 2025 Utopia
+      </div>
+    </div>
+  </aside>
+</div>

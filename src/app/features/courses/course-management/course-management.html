@@ -1,0 +1,159 @@
+<div class="space-y-6">
+  <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+    <div>
+      <h1 class="text-3xl font-bold">Gerenciamento de Cursos</h1>
+      <p class="text-base-content/70">Crie, edite e gerencie os cursos das suas comissões de formação.</p>
+    </div>
+    <button (click)="navigateToNewCourse()" class="btn btn-primary shadow-md hover:shadow-lg transition-shadow">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>
+      Criar Novo Curso
+    </button>
+  </div>
+
+  <div class="divider"></div>
+
+  @if (isLoading()) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (i of [1,2,3]; track i) {
+        <div class="skeleton h-64 w-full"></div>
+      }
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (course of visibleCourses(); track course.id) {
+      <div
+  class="card bg-gray-800 border border-gray-700 hover:border-primary/70 hover:-translate-y-1 shadow-md hover:shadow-primary/10 transition-all duration-300 rounded-xl animate-fade-in-up"
+>
+  <div class="card-body flex flex-col p-5 space-y-3">
+    <!-- Título e badge -->
+    <div class="flex justify-between items-start gap-2">
+      <h2 class="card-title text-lg font-semibold text-gray-100">
+        {{ course.title }}
+      </h2>
+
+      @if (course.isPublic) {
+        <div class="tooltip" data-tip="Página Pública Ativa">
+          <span
+            class="badge border-green-500 text-green-300 bg-green-900/30 text-xs px-2 py-1 rounded-md"
+            >Público</span
+          >
+        </div>
+      } @else {
+        <div class="tooltip" data-tip="Curso Privado / Rascunho">
+          <span
+            class="badge border-yellow-500 text-yellow-300 bg-yellow-900/30 text-xs px-2 py-1 rounded-md"
+            >Privado</span
+          >
+        </div>
+      }
+    </div>
+
+    <!-- Descrição -->
+    <p class="text-sm text-gray-400 leading-relaxed">
+      {{ course.description | slice: 0:120 }}...
+    </p>
+
+    <div class="border-t border-gray-700/70 my-2"></div>
+
+    <!-- Informações do curso -->
+    <div class="space-y-2 text-sm text-gray-300">
+      <div class="flex items-center gap-2">
+        <svg
+          class="w-4 h-4 text-gray-400"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            d="M7 8a3 3 0 100-6 3 3 0 000 6zM14.5 9a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM1.615 16.059a.75.75 0 01.32.092c.394.203.822.375 1.27.512a.75.75 0 01.527-.929c-.44-.135-.853-.301-1.22-.493a.75.75 0 01-.897.818zM18.385 16.059a.75.75 0 00-.897-.818c-.367.192-.78.358-1.22.493a.75.75 0 10.527.929c.448-.137.876-.309 1.27-.512a.75.75 0 00.32-.092zM10 12.5a.75.75 0 01.75.75v.008a.75.75 0 01-1.5 0V13.25a.75.75 0 01.75-.75z"
+          />
+        </svg>
+        <span
+          >Comissão:
+          <strong class="text-gray-100">{{ course.commissionName }}</strong></span
+        >
+      </div>
+
+      <div class="flex items-center gap-2">
+        @switch(course.locationType) {
+          @case('physical') {
+            <svg
+              class="w-4 h-4 text-gray-400"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.1.4-.22.655-.364C11.888 18.005 13 16.908 13 15.5c0-1.293-.82-2.528-2-3.414-.142-.107-.26-.184-.345-.245a.75.75 0 00-.81 0c-.086.06-.203.138-.345.245-1.18.886-2 2.121-2 3.414 0 1.408 1.112 2.505 1.769 3.082.256.144.47.264.655.364a5.741 5.741 0 00.28.14l.018.008.006.003zM10 11.25a2.25 2.25 0 100 4.5 2.25 2.25 0 000-4.5z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            <span><strong>Presencial</strong></span>
+          }
+          @case('virtual') {
+            <svg
+              class="w-4 h-4 text-gray-400"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                d="M15.5 2A1.5 1.5 0 0014 3.5v13a1.5 1.5 0 001.5 1.5h1a1.5 1.5 0 001.5-1.5v-13A1.5 1.5 0 0016.5 2h-1zM9.5 6A1.5 1.5 0 008 7.5v9A1.5 1.5 0 009.5 18h1a1.5 1.5 0 001.5-1.5v-9A1.5 1.5 0 0010.5 6h-1zM3.5 10A1.5 1.5 0 002 11.5v5A1.5 1.5 0 003.5 18h1A1.5 1.5 0 006 16.5v-5A1.5 1.5 0 004.5 10h-1z"
+              />
+            </svg>
+            <span><strong>Virtual</strong></span>
+          }
+          @default {
+            <svg
+              class="w-4 h-4 text-gray-400"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM8.94 6.44a.75.75 0 00-1.38-.03l-1.5 6a.75.75 0 101.44.38l.4-1.6a.75.75 0 011.44 0l.4 1.6a.75.75 0 101.44-.38l-1.5-6zM10 12.5a.75.75 0 01.75.75v.008a.75.75 0 01-1.5 0V13.25a.75.75 0 01.75-.75z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            <span>Local <strong>A Definir</strong></span>
+          }
+        }
+      </div>
+    </div>
+
+    <!-- Ação -->
+    <div class="card-actions justify-end pt-3">
+      <button
+        (click)="navigateToCourse(course.id)"
+        class="btn btn-sm bg-primary text-white border-none hover:bg-primary/80 transition-all duration-200"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          class="w-5 h-5 mr-1"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M12.293 3.293a1 1 0 011.414 0L19 8.586a1 1 0 010 1.414l-5.293 5.293a1 1 0 01-1.414-1.414L15.586 10H4a1 1 0 110-2h11.586l-3.293-3.293a1 1 0 010-1.414z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        Ver Detalhes
+      </button>
+    </div>
+  </div>
+</div>
+
+      } @empty {
+        <div class="col-span-full text-center p-12 bg-base-200/50 rounded-box border-2 border-dashed border-base-300">
+          <svg class="w-16 h-16 mx-auto opacity-20" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>
+          <h3 class="text-xl font-bold mt-4">Nenhum curso encontrado</h3>
+          <p class="text-base-content/60">Clique em "Criar Novo Curso" para começar.</p>
+        </div>
+      }
+    </div>
+  }
+</div>

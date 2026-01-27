@@ -1,0 +1,15 @@
+<div class="p-8 rounded-lg bg-background-alt border border-surface-400">
+  <h2 class="text-2xl font-bold text-tertiary mb-6">Próximas Eventos</h2>
+
+  @for (activity of activities(); track activity.id) {
+    <div class="p-4 mb-4 rounded-md bg-surface-200 border border-surface-400 hover:border-primary transition-colors">
+      <h3 class="font-semibold text-primary">{{ activity.title }}</h3>
+      <p class="text-sm text-text-muted">{{ activity.description }}</p>
+      <p class="text-xs text-text-subtle mt-2">
+        Data: {{ activity.date.toDate() | date: 'dd/MM/yyyy HH:mm' }}
+      </p>
+    </div>
+  } @empty {
+    <p class="text-text-muted">Nenhum evento agendada no momento.</p>
+  }
+</div>

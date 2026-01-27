@@ -1,1 +1,140 @@
 /* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+@plugin "daisyui";
+@plugin "daisyui/theme" {
+  name: "business";
+  default: true;
+  --color-primary: #E3262B;    /* Vermelho vivo, ligeiramente mais quente */
+  --color-secondary: #FF9A76;
+}
+@theme {
+  /* 🔴 Paleta principal da marca — elegante, mas vibrante */
+    --color-primary: #E3262B;     /* Vermelho vivo, ligeiramente mais quente */
+  --color-secondary: #181818;         /* Grafite profundo (em vez do preto absoluto) */
+  --color-tertiary: #FFFFFF;          /* Branco puro — contraste e leitura */
+
+  /* ⚫️ Tons neutros e superfícies refinadas */
+  --color-surface-50:  #141414;
+  --color-surface-100: #1A1A1A;
+  --color-surface-200: #202020;
+  --color-surface-300: #262626;
+  --color-surface-400: #2E2E2E;
+  --color-surface-500: #383838;
+  --color-surface-600: #4A4A4A;
+  --color-surface-700: #5E5E5E;
+  --color-surface-800: #757575;
+  --color-surface-900: #9A9A9A;
+
+  /* 🩸 Acentos derivados do vermelho */
+  --color-accent: #FF4D4D;            /* Vermelho claro (hover, detalhes) */
+  --color-accent-dark: #B80000;       /* Vermelho escuro refinado (estado ativo) */
+  --color-accent-glow: #FF3333;       /* Para highlights e gradientes */
+  --color-accent-soft: #FFBABA;       /* Elementos sutis e claros */
+
+  /* ✨ Texto e contraste equilibrado */
+  --color-text-base: #EAEAEA;
+  --color-text-muted: #B8B8B8;
+  --color-text-subtle: #8A8A8A;
+  --color-text-inverse: #121212;
+
+  /* 🌑 Fundo e estrutura com elegância */
+  --color-background: #121212;        /* Fundo principal — menos pesado */
+  --color-background-alt: #181818;    /* Superfícies elevadas */
+  --color-background-hover: #202020;  /* Leve realce ao interagir */
+
+  /* 🪞Gradientes tecnológicos suaves */
+  --gradient-primary: linear-gradient(120deg, #FF2B2B 0%, #7A0000 70%, #181818 100%);
+  --gradient-accent: linear-gradient(100deg, #FF4D4D 0%, #B80000 65%, #202020 100%);
+  --gradient-depth: linear-gradient(180deg, #121212 0%, #1E1E1E 100%);
+
+  /* 💠 Sistema de marca coerente e sofisticado */
+  --color-brand-primary: #FF2B2B;
+  --color-brand-secondary: #181818;
+  --color-brand-tertiary: #FFFFFF;
+  --color-brand-surface: #1A1A1A;
+  --color-brand-highlight: #FF4D4D;
+  --color-brand-text: #F5F5F5;
+  --color-brand-muted: #B8B8B8;
+    /* Cores Principais */
+    --s: 24 24 24;          /* --color-secondary: #181818 (Grafite) */
+    --a: 255 255 255;       /* --color-tertiary: #FFFFFF (Acento/Contraste) */
+    --n: 184 184 184;       /* --color-text-muted: #B8B8B8 (Neutro) */
+
+    /* Cores de Fundo (Base) */
+    --b1: 18 18 18;          /* --color-background: #121212 (Fundo principal) */
+    --b2: 24 24 24;          /* --color-background-alt: #181818 (Superfícies elevadas) */
+    --b3: 32 32 32;          /* --color-background-hover: #202020 (Realce/Bordas) */
+
+    /* Cores de Conteúdo (Texto) */
+    --pc: 234 234 234;       /* Texto sobre Primary (Branco/Claro) */
+    --sc: 234 234 234;       /* Texto sobre Secondary (Branco/Claro) */
+    --ac: 18 18 18;          /* Texto sobre Accent (Preto/Escuro) */
+    --nc: 18 18 18;          /* Texto sobre Neutral (Preto/Escuro) */
+    --bc: 234 234 234;       /* --color-text-base: #EAEAEA (Texto sobre Base) */
+
+    /* Cores de Status/Feedback */
+    --in: 255 77 77;         /* --color-accent: #FF4D4D (Info/Acento Secundário) */
+    --su: 34 197 94;         /* Verde padrão (Success) */
+    --wa: 251 191 36;         /* Amarelo padrão (Warning) */
+    --er: 184 0 0;           /* --color-accent-dark: #B80000 (Error/Estado Ativo) */
+
+    /* Variáveis de Componentes (Opcional, mas recomendado) */
+    --rounded-box: 0.5rem;
+    --rounded-btn: 0.5rem;
+    --rounded-badge: 1.9rem;
+    --tab-radius: 0.5rem;
+
+    /*
+      Opcional: Mantenha suas variáveis originais para uso
+      em estilos que não são componentes daisyUI.
+      Isso garante que seu sistema de design completo esteja disponível.
+    */
+    --color-primary: #FF2B2B;
+    --color-secondary: #181818;
+    --color-tertiary: #FFFFFF;
+
+    --color-surface-50:  #141414;
+    --color-surface-100: #1A1A1A;
+    /* ... todas as suas outras variáveis de superfície ... */
+
+    --color-accent: #FF4D4D;
+    --color-accent-dark: #B80000;
+    /* ... todas as suas outras variáveis de acento ... */
+
+    --color-text-base: #EAEAEA;
+    --color-text-muted: #B8B8B8;
+    --color-text-subtle: #8A8A8A;
+    --color-text-inverse: #121212;
+
+    --color-background: #121212;
+    --color-background-alt: #181818;
+    --color-background-hover: #202020;
+
+    /* Gradientes (não são usados pelo daisyUI, mas úteis para você) */
+    --gradient-primary: linear-gradient(120deg, #FF2B2B 0%, #7A0000 70%, #181818 100%);
+    --gradient-accent: linear-gradient(100deg, #FF4D4D 0%, #B80000 65%, #202020 100%);
+    --gradient-depth: linear-gradient(180deg, #121212 0%, #1E1E1E 100%);
+--font-sans: "Inter", sans-serif;
+  --font-serif: "Lora", serif;
+
+}
+
+/* 🌗 Tema dark refinado e confortável para leitura */
+body.theme-dark {
+  --color-primary: #E02020;
+  --color-secondary: #1A1A1A;
+  --color-tertiary: #F5F5F5;
+--font-sans: "Inter", sans-serif;
+  --font-serif: "Lora", serif;
+
+  --color-background: #121212;
+  --color-background-alt: #181818;
+  --color-background-hover: #202020;
+
+  --color-text-base: #ECECEC;
+  --color-text-muted: #A5A5A5;
+
+  --gradient-primary: linear-gradient(120deg, #E02020 0%, #7A0000 65%, #181818 100%);
+  --gradient-accent: linear-gradient(100deg, #FF4D4D 0%, #B80000 60%, #202020 100%);
+  --gradient-depth: linear-gradient(180deg, #121212 0%, #1E1E1E 100%);
+}
