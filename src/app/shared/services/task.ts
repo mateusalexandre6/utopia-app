@@ -1,16 +1,19 @@
-// src/app/core/services/task.service.ts
-
+// src/app/shared/services/task.ts
 import { Injectable, inject } from '@angular/core';
 import { Firestore, addDoc, collection, doc, updateDoc, deleteDoc, Timestamp } from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
-import { TaskStatus } from '../models/task.model';
+import { TaskStatus, TaskPriority } from '../models/task.model';
 
-// Interface para os dados do formulário, agora com o responsável opcional
+// Interface atualizada com TUDO que o formulário envia
 interface TaskFormData {
   title: string;
   description?: string;
   commissionId: string;
-  assignedTo?: string | null; // <-- NOVO CAMPO
+  organizationId: string; // <-- Obrigatório para o filtro de segurança
+  assignedTo?: string | null;
+  priority: TaskPriority; // <-- Novo
+  dueDate: string;        // <-- Vem como string do input date
+  status?: TaskStatus;
 }
 
 @Injectable({
@@ -20,19 +23,25 @@ export class TaskService {
   private firestore: Firestore = inject(Firestore);
   private authService: AuthService = inject(AuthService);
 
-  /**
-   * Cria uma nova tarefa no Firestore.
-   */
   async createTask(formData: TaskFormData) {
     const user = this.authService.currentUser();
     if (!user) throw new Error("Usuário não autenticado.");
 
     const tasksCollection = collection(this.firestore, 'tasks');
+
+    // Tratamento de data: converte string para Timestamp do Firestore
+    const dueDateTimestamp = formData.dueDate
+      ? Timestamp.fromDate(new Date(formData.dueDate))
+      : Timestamp.now(); // Fallback se vier vazio
+
     const newTask = {
       title: formData.title,
       description: formData.description || '',
       commissionId: formData.commissionId,
+      organizationId: formData.organizationId, // <-- SALVANDO O ID DO NÚCLEO
       status: 'todo' as TaskStatus,
+      priority: formData.priority || 'medium',
+      dueDate: dueDateTimestamp,
       createdBy: user.uid,
       createdAt: Timestamp.now(),
       assignedTo: formData.assignedTo || null,
@@ -40,32 +49,32 @@ export class TaskService {
     return addDoc(tasksCollection, newTask);
   }
 
-  /**
-   * **NOVO MÉTODO**
-   * Atualiza todos os detalhes de uma tarefa (usado pelo formulário de edição).
-   */
-  async updateTaskDetails(taskId: string, formData: TaskFormData) {
+  // Renomeado de 'updateTaskDetails' para 'updateTask' para facilitar
+  async updateTask(taskId: string, formData: TaskFormData) {
     const taskDocRef = doc(this.firestore, 'tasks', taskId);
+
+    const dueDateTimestamp = formData.dueDate
+      ? Timestamp.fromDate(new Date(formData.dueDate))
+      : Timestamp.now();
+
     const updatedData = {
       title: formData.title,
       description: formData.description || '',
       commissionId: formData.commissionId,
+      organizationId: formData.organizationId, // Mantém atualizado
       assignedTo: formData.assignedTo || null,
+      priority: formData.priority,
+      dueDate: dueDateTimestamp,
+      // Status não atualiza aqui, só no Kanban
     };
     return updateDoc(taskDocRef, updatedData);
   }
 
-  /**
-   * Atualiza APENAS o status de uma tarefa (usado pelo Kanban).
-   */
   async updateTaskStatus(taskId: string, newStatus: TaskStatus) {
     const taskDocRef = doc(this.firestore, 'tasks', taskId);
     return updateDoc(taskDocRef, { status: newStatus });
   }
 
-  /**
-   * Exclui uma tarefa.
-   */
   async deleteTask(taskId: string) {
     const taskDocRef = doc(this.firestore, 'tasks', taskId);
     return deleteDoc(taskDocRef);

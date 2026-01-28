@@ -108,11 +108,12 @@ export class ActivityFormComponent implements OnInit {
     try {
       // O serviço só precisa dos dados finais, não do organizationId temporário
       const formData = {
-        title: currentModel.title,
-        description: currentModel.description,
-        date: currentModel.date,
-        commissionId: currentModel.commissionId,
-      };
+  title: currentModel.title,
+  description: currentModel.description,
+  date: currentModel.date,
+  commissionId: currentModel.commissionId,
+  organizationId: currentModel.organizationId // <--- ENVIAR O ID DO NÚCLEO
+};
       if (this.isEditMode && this.activityToEdit) {
         await this.activityService.updateActivity(this.activityToEdit.id, formData);
       } else {

@@ -81,7 +81,9 @@ export class ActivityManagementComponent {
       return activitiesWithNames;
     } else {
       const myOrgIds = this.userOrganizationIds();
-      return activitiesWithNames.filter(act => myOrgIds.includes(act.commissionId));
+      return activitiesWithNames.filter(act =>
+          act.parentOrganizationId && myOrgIds.includes(act.parentOrganizationId)
+      );
     }
   });
 

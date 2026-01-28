@@ -1,8 +1,10 @@
 <dialog class="modal modal-open">
-  <div class="modal-box bg-gray-800 text-gray-100 shadow-xl rounded-lg">
-    <h3 class="font-bold text-lg mb-2">
-      @if (isEditMode) { Editar Tarefa } @else { Nova Tarefa }
+  <div class="modal-box bg-gray-800 text-gray-100 shadow-xl rounded-lg w-11/12 max-w-2xl">
+
+    <h3 class="font-bold text-lg mb-4">
+      @if (taskToEdit) { Editar Tarefa } @else { Nova Tarefa }
     </h3>
+
     <button
       (click)="close.emit()"
       class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-gray-300 hover:text-white"
@@ -10,83 +12,118 @@
       ✕
     </button>
 
-    <form (ngSubmit)="onSave()" class="py-4 space-y-4">
-      <!-- Título -->
+    <div class="py-2 space-y-4">
+
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text text-gray-200 font-semibold">Núcleo</span>
+        </label>
+        <select
+          [ngModel]="model().organizationId"
+          (ngModelChange)="onOrganizationChange($event)"
+          [disabled]="isNucleoLocked()"
+          class="select w-full border border-gray-600 bg-gray-700 text-gray-100 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary disabled:bg-gray-900 disabled:text-gray-500"
+        >
+          <option value="" disabled selected>Selecione um Núcleo</option>
+          @for (org of allOrganizations(); track org.id) {
+            <option [value]="org.id">{{ org.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text text-gray-200 font-semibold">Comissão</span>
+        </label>
+        <select
+          [ngModel]="model().commissionId"
+          (ngModelChange)="updateField('commissionId', $event)"
+          [disabled]="!model().organizationId"
+          class="select w-full border border-gray-600 bg-gray-700 text-gray-100 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary disabled:bg-gray-900 disabled:text-gray-500"
+        >
+          <option value="" disabled selected>Selecione uma comissão</option>
+          @for (commission of availableCommissions(); track commission.id) {
+            <option [value]="commission.id">{{ commission.name }}</option>
+          }
+        </select>
+        @if (!model().organizationId) {
+           <span class="text-xs text-gray-500 mt-1 ml-1">Selecione um núcleo primeiro.</span>
+        }
+      </div>
+
       <div class="form-control">
         <label class="label">
           <span class="label-text text-gray-200">Título da Tarefa</span>
         </label>
         <input
-          [(ngModel)]="model.title"
-          name="title"
+          [ngModel]="model().title"
+          (ngModelChange)="updateField('title', $event)"
           type="text"
-          required
           placeholder="Ex: Redigir ata da reunião"
           class="input w-full border border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-400 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
         />
       </div>
 
-      <!-- Comissão -->
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text text-gray-200">Comissão</span>
-        </label>
-        <select
-          [(ngModel)]="model.commissionId"
-          name="commissionId"
-          required
-          class="select w-full border border-gray-600 bg-gray-700 text-gray-100 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-        >
-          <option disabled selected value="">Selecione uma comissão</option>
-          @for (commission of commissions(); track commission.id) {
-            <option [value]="commission.id">{{ commission.name }}</option>
-          }
-        </select>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text text-gray-200">Prioridade</span>
+            </label>
+            <select
+              [ngModel]="model().priority"
+              (ngModelChange)="updateField('priority', $event)"
+              class="select w-full border border-gray-600 bg-gray-700 text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+            >
+              <option value="low">Baixa</option>
+              <option value="medium">Média</option>
+              <option value="high">Alta</option>
+            </select>
+          </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text text-gray-200">Vencimento</span>
+            </label>
+            <input
+              [ngModel]="model().dueDate"
+              (ngModelChange)="updateField('dueDate', $event)"
+              type="date"
+              class="input w-full border border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-400 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary [color-scheme:dark]"
+            />
+          </div>
       </div>
 
-      <!-- Responsável -->
       <div class="form-control">
         <label class="label">
           <span class="label-text text-gray-200">Responsável (Opcional)</span>
         </label>
         <select
-          [(ngModel)]="model.assignedTo"
-          name="assignedTo"
+          [ngModel]="model().assignedTo"
+          (ngModelChange)="updateField('assignedTo', $event)"
           class="select w-full border border-gray-600 bg-gray-700 text-gray-100 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
         >
-          <option [ngValue]="null">Ninguém atribuído</option>
-          @for (user of users(); track user.uid) {
-            <option [value]="user.uid">{{ user?.email }}</option>
-          }
+          <option value="">Ninguém atribuído</option>
+          @for (user of availableUsers(); track user.uid) {
+  <option [value]="user.uid">{{ user.displayName || user.email }}</option>
+}
         </select>
       </div>
 
-      <!-- Descrição -->
       <div class="form-control">
         <label class="label">
           <span class="label-text text-gray-200">Descrição (Opcional)</span>
         </label>
         <textarea
-          [(ngModel)]="model.description"
-          name="description"
+          [ngModel]="model().description"
+          (ngModelChange)="updateField('description', $event)"
           placeholder="Detalhes da tarefa..."
-          class="textarea w-full border border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-400 rounded-lg px-4 py-2 h-28 resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+          class="textarea w-full border border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-400 rounded-lg px-4 py-2 h-24 resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
         ></textarea>
       </div>
 
-      <!-- Erros -->
-      @if (errorMessage) {
-        <div
-          role="alert"
-          class="border border-yellow-600 bg-yellow-900/30 text-yellow-300 rounded-lg px-3 py-2 text-sm"
-        >
-          <span>{{ errorMessage }}</span>
-        </div>
-      }
-    </form>
+    </div>
 
-    <!-- Ações -->
-    <div class="modal-action mt-2">
+    <div class="modal-action mt-4">
       <button
         (click)="close.emit()"
         class="btn btn-ghost hover:bg-gray-700 text-white rounded-lg"
@@ -95,16 +132,15 @@
       </button>
       <button
         (click)="onSave()"
-        class="btn btn-primary rounded-lg"
-        [disabled]="isLoading"
+        class="btn btn-primary rounded-lg text-white"
+        [disabled]="isLoading || !model().title || !model().commissionId || !model().organizationId"
       >
-        @if (isLoading) { <span class="loading loading-spinner"></span> }
+        @if (isLoading) { <span class="loading loading-spinner loading-sm"></span> }
         Salvar
       </button>
     </div>
   </div>
 
-  <!-- Fechar modal -->
   <form method="dialog" class="modal-backdrop" (click)="close.emit()">
     <button>close</button>
   </form>

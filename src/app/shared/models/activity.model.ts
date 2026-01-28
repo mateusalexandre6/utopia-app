@@ -6,6 +6,7 @@ export interface Activity {
   title: string;
   description: string;
   date: Timestamp;
-  commissionId: string; // <-- ALTERADO DE organizationId
+  commissionId: string;
+  organizationId: string;
   createdBy: string;
 }

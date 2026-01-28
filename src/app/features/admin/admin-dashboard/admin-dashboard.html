@@ -1,20 +1,23 @@
 <div class="space-y-6">
   <h1 class="text-3xl font-bold text-gray-100">Painel de Gerenciamento</h1>
 
-  <!-- Tabs estilizadas -->
   <div role="tablist"
-       class="flex border-b border-gray-700 text-gray-300 text-sm font-medium">
+       class="flex border-b border-gray-700 text-gray-300 text-sm font-medium overflow-x-auto">
+
+    @if (isNationalAdmin()) {
+      <button role="tab"
+              class="px-5 py-3 border-b-2 transition-all duration-200 whitespace-nowrap"
+              [ngClass]="{
+                'border-primary text-primary': activeTab() === 'organizations',
+                'border-transparent hover:text-gray-100 hover:border-gray-600': activeTab() !== 'organizations'
+              }"
+              (click)="activeTab.set('organizations')">
+        Núcleos
+      </button>
+    }
+
     <button role="tab"
-            class="px-5 py-3 border-b-2 transition-all duration-200"
-            [ngClass]="{
-              'border-primary text-primary': activeTab() === 'organizations',
-              'border-transparent hover:text-gray-100 hover:border-gray-600': activeTab() !== 'organizations'
-            }"
-            (click)="activeTab.set('organizations')">
-      Núcleos
-    </button>
-    <button role="tab"
-            class="px-5 py-3 border-b-2 transition-all duration-200"
+            class="px-5 py-3 border-b-2 transition-all duration-200 whitespace-nowrap"
             [ngClass]="{
               'border-primary text-primary': activeTab() === 'commissions',
               'border-transparent hover:text-gray-100 hover:border-gray-600': activeTab() !== 'commissions'
@@ -22,8 +25,9 @@
             (click)="activeTab.set('commissions')">
       Comissões
     </button>
+
     <button role="tab"
-            class="px-5 py-3 border-b-2 transition-all duration-200"
+            class="px-5 py-3 border-b-2 transition-all duration-200 whitespace-nowrap"
             [ngClass]="{
               'border-primary text-primary': activeTab() === 'users',
               'border-transparent hover:text-gray-100 hover:border-gray-600': activeTab() !== 'users'
@@ -33,12 +37,13 @@
     </button>
   </div>
 
-  <!-- Card principal -->
   <div class="card bg-gray-800 text-gray-100 border border-gray-700 shadow-xl rounded-lg transition-all duration-300">
     <div class="card-body p-6">
       @switch (activeTab()) {
         @case ('organizations') {
-          <app-organization-list></app-organization-list>
+          @if (isNationalAdmin()) {
+            <app-organization-list></app-organization-list>
+          }
         }
         @case ('commissions') {
           <app-commission-list></app-commission-list>

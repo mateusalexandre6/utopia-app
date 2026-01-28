@@ -1,11 +1,21 @@
-<div class="space-y-6 text-gray-100">
-  <!-- Cabeçalho -->
+<div class="space-y-6 text-gray-100 p-4">
   <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
     <h1 class="text-2xl font-bold text-gray-100">Quadro de Tarefas</h1>
 
      <div class="join">
-      <button class="btn btn-sm join-item" [class.btn-primary]="filterState() === 'my-organizations'" (click)="filterState.set('my-organizations')" [disabled]="isNationalAdmin()">Minhas Comissões</button>
-      <button class="btn btn-sm join-item" [class.btn-primary]="filterState() === 'all'" (click)="filterState.set('all')">Todas</button>
+      <button
+        class="btn btn-sm join-item"
+        [class.btn-primary]="filterState() === 'my-organizations'"
+        (click)="setFilterState('my-organizations')"
+        [disabled]="isNationalAdmin()">
+        Minhas Comissões
+      </button>
+      <button
+        class="btn btn-sm join-item"
+        [class.btn-primary]="filterState() === 'all'"
+        (click)="setFilterState('all')">
+        Todas
+      </button>
     </div>
 
     <button
@@ -19,199 +29,224 @@
     </button>
   </div>
 
-  <!-- Colunas -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" cdkDropListGroup>
-    <!-- Coluna: A Fazer -->
-    <div class="card bg-gray-800 border border-gray-700 shadow-lg">
-      <div class="card-body">
-        <h2 class="card-title justify-center">
-          <span class="badge badge-info badge-lg text-white p-3">A Fazer</span>
-        </h2>
+  <div class="flex flex-wrap gap-4 bg-gray-800/50 p-3 rounded-lg border border-gray-700 items-center">
+    <span class="text-sm font-semibold text-gray-400 flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+      Filtrar por:
+    </span>
 
-        <div id="todo" class="space-y-4 min-h-96 p-2 rounded-lg" cdkDropList [cdkDropListData]="todoTasks()" (cdkDropListDropped)="onTaskDrop($event)">
-          @for (task of todoTasks(); track task.id) {
-          <div
-  class="card bg-gray-700/80 border border-gray-600 hover:border-primary/70 shadow-lg cursor-grab active:cursor-grabbing transition-all relative rounded-xl backdrop-blur-sm hover:shadow-primary/10"
-  cdkDrag
-  [cdkDragData]="task"
->
-  <div class="card-body space-y-3">
-    <!-- Título e botão de opções -->
-    <div class="flex justify-between items-start">
-      <h3 class="font-semibold text-gray-100 leading-tight pr-8">
-        {{ task.title }}
-      </h3>
+    @if (filterState() === 'all') {
+      <select
+        [ngModel]="selectedOrgFilter()"
+        (ngModelChange)="selectedOrgFilter.set($event); selectedCommissionFilter.set('')"
+        class="select select-bordered select-sm bg-gray-700 text-gray-100 border-gray-600 focus:outline-none focus:border-primary">
+        <option value="">Todos os Núcleos</option>
+        @for (org of allOrganizations(); track org.id) {
+          <option [value]="org.id">{{ org.name }}</option>
+        }
+      </select>
+    }
 
+    <select
+      [ngModel]="selectedCommissionFilter()"
+      (ngModelChange)="selectedCommissionFilter.set($event)"
+      [disabled]="filterState() === 'all' && !selectedOrgFilter()"
+      class="select select-bordered select-sm bg-gray-700 text-gray-100 border-gray-600 focus:outline-none focus:border-primary disabled:bg-gray-800 disabled:text-gray-500">
+      <option value="">Todas as Comissões</option>
+      @for (comm of commissionsForFilter(); track comm.id) {
+        <option [value]="comm.id">{{ comm.name }}</option>
+      }
+    </select>
+
+    @if (selectedOrgFilter() || selectedCommissionFilter()) {
       <button
-        (click)="onEditTask(task)"
-        class="btn btn-ghost btn-xs text-gray-400 hover:text-white hover:bg-gray-600 rounded-md p-1"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg"
-             viewBox="0 0 20 20"
-             fill="currentColor"
-             class="w-5 h-5">
-          <path d="M10 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 5.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 5.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z" />
-        </svg>
+        (click)="selectedOrgFilter.set(''); selectedCommissionFilter.set('')"
+        class="btn btn-ghost btn-xs text-gray-400 hover:text-white">
+        Limpar Filtros ✕
       </button>
-    </div>
+    }
+  </div>
 
-    <!-- Descrição -->
-    <p class="text-sm text-gray-400 line-clamp-3">
-      {{ task.description }}
-    </p>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-full min-h-[500px]" cdkDropListGroup>
 
-    <!-- Badges e avatar -->
-    <div class="flex justify-between items-center pt-2">
-      <span
-        class="text-xs px-2 py-1 rounded-md bg-gray-600/60 text-gray-200 border border-gray-500">
-        {{ task.commissionName }}
-      </span>
+    <div class="flex flex-col bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-700">
+      <h2 class="font-bold text-lg mb-4 flex items-center gap-2 text-indigo-400">
+        <div class="w-3 h-3 rounded-full bg-indigo-500"></div>
+        A Fazer <span class="text-sm font-normal text-gray-500 ml-auto">{{ todoTasks().length }}</span>
+      </h2>
 
-      @if (task.assignedToName) {
-        <div class="tooltip" [attr.data-tip]="task.assignedToName">
-          <div class="avatar placeholder">
-            <div
-              class="bg-primary/80 text-white rounded-full w-8 h-8 flex items-center justify-center font-medium shadow-sm"
-            >
-              <span>{{ task.assignedToName.charAt(0) }}</span>
+      <div
+        cdkDropList
+        id="todo"
+        [cdkDropListData]="todoTasks()"
+        (cdkDropListDropped)="onTaskDrop($event)"
+        class="flex-1 flex flex-col gap-3 min-h-[100px]"
+      >
+        @for (task of todoTasks(); track task.id) {
+          <div
+            class="card bg-gray-700 hover:bg-gray-650 transition-all relative rounded-lg border border-gray-600 group"
+            cdkDrag
+            [cdkDragData]="task"
+          >
+            <div class="card-body p-4">
+              <div class="flex justify-between items-start mb-2">
+                <span class="badge badge-xs font-semibold border-none"
+                  [ngClass]="{
+                    'badge-error text-white': task.priority === 'high',
+                    'badge-warning text-black': task.priority === 'medium',
+                    'badge-success text-white': task.priority === 'low'
+                  }">
+                  {{ task.priority === 'high' ? 'Alta' : task.priority === 'medium' ? 'Média' : 'Baixa' }}
+                </span>
+
+                @if (canModify(task)) {
+                  <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button (click)="onEditTask(task)" class="btn btn-ghost btn-xs text-gray-400 hover:text-white px-1">✎</button>
+                    <button (click)="onDeleteTask(task)" class="btn btn-ghost btn-xs text-red-400 hover:text-red-200 px-1">🗑</button>
+                  </div>
+                }
+              </div>
+
+              <h3 class="font-semibold text-gray-100 leading-snug">{{ task.title }}</h3>
+
+              @if (task.description) {
+                <p class="text-xs text-gray-400 mt-2 line-clamp-2">{{ task.description }}</p>
+              }
+
+              <div class="flex justify-between items-end mt-3 pt-3 border-t border-gray-600/50">
+                <span class="badge badge-ghost badge-sm h-auto py-1 text-left whitespace-normal text-indigo-200 bg-indigo-900/30 border-indigo-500/30">
+                  {{ task.commissionName }}
+                </span>
+
+                @if (task.assignedToName) {
+                  <div class="tooltip tooltip-left" [attr.data-tip]="task.assignedToName">
+                    <div class="avatar placeholder">
+                      <div class="bg-indigo-600 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center ring-2 ring-gray-700">
+                        <span>{{ task.assignedToName.charAt(0).toUpperCase() }}</span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
             </div>
           </div>
-        </div>
-      }
-    </div>
-
-    <!-- Ações inferiores -->
-    <div class="flex justify-between items-center text-gray-400 text-xs mt-2 pt-2 border-t border-gray-600/50">
-      <div class="flex items-center gap-3">
-        <div class="flex items-center gap-1 hover:text-primary transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
-               stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3" />
-          </svg>
-          <span>2d</span>
-        </div>
-
-        <div class="flex items-center gap-1 hover:text-primary transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
-               stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M7 8h10M7 12h8m-8 4h6" />
-          </svg>
-          <span>3 subtarefas</span>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <button class="btn btn-ghost btn-xs text-gray-400 hover:text-primary hover:bg-gray-600 rounded-md p-1">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-               viewBox="0 0 24 24" stroke="currentColor"
-               stroke-width="2" class="w-4 h-4">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M5 13l4 4L19 7" />
-          </svg>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-          }
-        </div>
+        }
       </div>
     </div>
 
-    <!-- Coluna: Em Execução -->
-    <div class="card bg-gray-800 border border-gray-700 shadow-lg">
-      <div class="card-body">
-        <h2 class="card-title justify-center">
-          <span class="badge badge-warning badge-lg text-gray-900 p-3">Em Execução</span>
-        </h2>
+    <div class="flex flex-col bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-700">
+      <h2 class="font-bold text-lg mb-4 flex items-center gap-2 text-yellow-400">
+        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+        Fazendo <span class="text-sm font-normal text-gray-500 ml-auto">{{ doingTasks().length }}</span>
+      </h2>
 
-        <div id="doing" class="space-y-4 min-h-96 p-2 rounded-lg" cdkDropList [cdkDropListData]="doingTasks()" (cdkDropListDropped)="onTaskDrop($event)">
-          @for (task of doingTasks(); track task.id) {
-            <div
-              class="card card-compact bg-gray-700 border-2 border-transparent hover:border-primary shadow-md cursor-grab active:cursor-grabbing transition-all relative rounded-lg"
-              cdkDrag
-              [cdkDragData]="task"
-            >
-              <div class="card-body">
-                <h3 class="font-semibold text-gray-100">{{ task.title }}</h3>
-                <p class="text-sm text-gray-400">{{ task.description }}</p>
-
-                <div class="card-actions justify-between items-center mt-3">
-                  <span class="badge badge-outline text-gray-300 border-gray-500">{{ task.commissionName }}</span>
-
-                  @if (task.assignedToName) {
-                    <div class="tooltip" [attr.data-tip]="task.assignedToName">
-                      <div class="avatar placeholder">
-                        <div class="bg-gray-600 text-gray-100 rounded-full w-8 h-8 flex items-center justify-center">
-                          <span>{{ task.assignedToName.charAt(0) }}</span>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                </div>
-
-                <button
-                  (click)="onEditTask(task)"
-                  class="btn btn-ghost btn-xs absolute top-2 right-2 text-gray-300 hover:bg-gray-600"
-                >...</button>
+      <div
+        cdkDropList
+        id="doing"
+        [cdkDropListData]="doingTasks()"
+        (cdkDropListDropped)="onTaskDrop($event)"
+        class="flex-1 flex flex-col gap-3 min-h-[100px]"
+      >
+        @for (task of doingTasks(); track task.id) {
+           <div class="card bg-gray-700 hover:bg-gray-650 transition-all relative rounded-lg border border-gray-600 group" cdkDrag [cdkDragData]="task">
+            <div class="card-body p-4">
+              <div class="flex justify-between items-start mb-2">
+                <span class="badge badge-xs font-semibold border-none" [ngClass]="{'badge-error text-white': task.priority === 'high', 'badge-warning text-black': task.priority === 'medium', 'badge-success text-white': task.priority === 'low'}">
+                  {{ task.priority === 'high' ? 'Alta' : task.priority === 'medium' ? 'Média' : 'Baixa' }}
+                </span>
+                @if (canModify(task)) {
+                  <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button (click)="onEditTask(task)" class="btn btn-ghost btn-xs text-gray-400 hover:text-white px-1">✎</button>
+                    <button (click)="onDeleteTask(task)" class="btn btn-ghost btn-xs text-red-400 hover:text-red-200 px-1">🗑</button>
+                  </div>
+                }
+              </div>
+              <h3 class="font-semibold text-gray-100 leading-snug">{{ task.title }}</h3>
+              <div class="flex justify-between items-end mt-3 pt-3 border-t border-gray-600/50">
+                <span class="badge badge-ghost badge-sm h-auto py-1 text-left whitespace-normal text-yellow-200 bg-yellow-900/30 border-yellow-500/30">
+                  {{ task.commissionName }}
+                </span>
+                @if (task.assignedToName) {
+                  <div class="tooltip tooltip-left" [attr.data-tip]="task.assignedToName">
+                    <div class="avatar placeholder"><div class="bg-indigo-600 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center ring-2 ring-gray-700"><span>{{ task.assignedToName.charAt(0).toUpperCase() }}</span></div></div>
+                  </div>
+                }
               </div>
             </div>
-          }
-        </div>
+          </div>
+        }
       </div>
     </div>
 
-    <!-- Coluna: Concluída -->
-    <div class="card bg-gray-800 border border-gray-700 shadow-lg">
-      <div class="card-body">
-        <h2 class="card-title justify-center">
-          <span class="badge badge-success badge-lg text-white p-3">Concluída</span>
-        </h2>
+    <div class="flex flex-col bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-700">
+      <h2 class="font-bold text-lg mb-4 flex items-center gap-2 text-green-400">
+        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+        Concluído <span class="text-sm font-normal text-gray-500 ml-auto">{{ doneTasks().length }}</span>
+      </h2>
 
-        <div id="done" class="space-y-4 min-h-96 p-2 rounded-lg" cdkDropList [cdkDropListData]="doneTasks()" (cdkDropListDropped)="onTaskDrop($event)">
-          @for (task of doneTasks(); track task.id) {
-            <div
-              class="card card-compact bg-gray-700 border-2 border-transparent hover:border-primary shadow-md cursor-grab active:cursor-grabbing transition-all relative rounded-lg"
-              cdkDrag
-              [cdkDragData]="task"
-            >
-              <div class="card-body">
-                <h3 class="font-semibold text-gray-100">{{ task.title }}</h3>
-                <p class="text-sm text-gray-400">{{ task.description }}</p>
-
-                <div class="card-actions justify-between items-center mt-3">
-                  <span class="badge badge-outline text-gray-300 border-gray-500">{{ task.commissionName }}</span>
-
-                  @if (task.assignedToName) {
-                    <div class="tooltip" [attr.data-tip]="task.assignedToName">
-                      <div class="avatar placeholder">
-                        <div class="bg-gray-600 text-gray-100 rounded-full w-8 h-8 flex items-center justify-center">
-                          <span>{{ task.assignedToName.charAt(0) }}</span>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                </div>
-
-                <button
-                  (click)="onEditTask(task)"
-                  class="btn btn-ghost btn-xs absolute top-2 right-2 text-gray-300 hover:bg-gray-600"
-                >...</button>
+      <div
+        cdkDropList
+        id="done"
+        [cdkDropListData]="doneTasks()"
+        (cdkDropListDropped)="onTaskDrop($event)"
+        class="flex-1 flex flex-col gap-3 min-h-[100px]"
+      >
+        @for (task of doneTasks(); track task.id) {
+           <div class="card bg-gray-700 hover:bg-gray-650 transition-all relative rounded-lg border border-gray-600 group opacity-75 hover:opacity-100" cdkDrag [cdkDragData]="task">
+            <div class="card-body p-4">
+              <div class="flex justify-between items-start mb-2">
+                <span class="badge badge-xs font-semibold border-none" [ngClass]="{'badge-error text-white': task.priority === 'high', 'badge-warning text-black': task.priority === 'medium', 'badge-success text-white': task.priority === 'low'}">
+                  {{ task.priority === 'high' ? 'Alta' : task.priority === 'medium' ? 'Média' : 'Baixa' }}
+                </span>
+                @if (canModify(task)) {
+                  <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button (click)="onEditTask(task)" class="btn btn-ghost btn-xs text-gray-400 hover:text-white px-1">✎</button>
+                    <button (click)="onDeleteTask(task)" class="btn btn-ghost btn-xs text-red-400 hover:text-red-200 px-1">🗑</button>
+                  </div>
+                }
+              </div>
+              <h3 class="font-semibold text-gray-100 leading-snug line-through decoration-gray-500">{{ task.title }}</h3>
+              <div class="flex justify-between items-end mt-3 pt-3 border-t border-gray-600/50">
+                <span class="badge badge-ghost badge-sm h-auto py-1 text-left whitespace-normal text-green-200 bg-green-900/30 border-green-500/30">
+                  {{ task.commissionName }}
+                </span>
+                @if (task.assignedToName) {
+                  <div class="tooltip tooltip-left" [attr.data-tip]="task.assignedToName">
+                    <div class="avatar placeholder"><div class="bg-indigo-600 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center ring-2 ring-gray-700"><span>{{ task.assignedToName.charAt(0).toUpperCase() }}</span></div></div>
+                  </div>
+                }
               </div>
             </div>
-          }
-        </div>
+          </div>
+        }
       </div>
     </div>
   </div>
 
-  <!-- Formulário -->
   @if (isFormVisible()) {
     <app-task-form
-      [taskToEdit]="editingTask()!"
+      [taskToEdit]="editingTask() || undefined"
       (close)="onCloseForm()"
-    ></app-task-form>
+    />
+  }
+
+  @if (taskToDelete()) {
+    <dialog class="modal modal-open">
+      <div class="modal-box bg-gray-800 text-gray-100">
+        <h3 class="font-bold text-lg text-red-400">Excluir Tarefa</h3>
+        <p class="py-4">
+          Tem certeza que deseja excluir a tarefa <span class="font-bold text-white">"{{ taskToDelete()?.title }}"</span>?
+          <br>
+          <span class="text-sm text-gray-400">Esta ação não pode ser desfeita.</span>
+        </p>
+        <div class="modal-action">
+          <button class="btn btn-ghost text-gray-300" (click)="cancelDelete()">Cancelar</button>
+          <button class="btn btn-error text-white" (click)="confirmDelete()">Sim, Excluir</button>
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop" (click)="cancelDelete()">
+        <button>close</button>
+      </form>
+    </dialog>
   }
 </div>

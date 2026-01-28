@@ -1,70 +1,149 @@
-// src/app/features/tasks/task-form/task-form.component.ts
-import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, OnInit, Output, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Task } from '../../../shared/models/task.model';
+import { CommonModule } from '@angular/common';
 import { FirestoreService } from '../../../shared/services/firestore.service';
 import { TaskService } from '../../../shared/services/task';
+import { AuthService } from '../../../shared/services/auth.service';
+import { Task, TaskPriority, TaskStatus } from '../../../shared/models/task.model';
+import { LoadingSpinner } from '../../../shared/components/loading-spinner/loading-spinner';
 
 @Component({
   selector: 'app-task-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule, CommonModule, LoadingSpinner],
   templateUrl: './task-form.html',
 })
 export class TaskFormComponent implements OnInit {
   @Input() taskToEdit?: Task;
   @Output() close = new EventEmitter<void>();
 
-  private taskService = inject(TaskService);
   private firestoreService = inject(FirestoreService);
+  private taskService = inject(TaskService);
+  private authService = inject(AuthService);
 
-  // Sinais para popular os dropdowns
-  commissions = this.firestoreService.commissions;
-  users = this.firestoreService.users;
+  // --- Sinais Brutos ---
+  allOrganizations = this.firestoreService.organizations;
+  allCommissions = this.firestoreService.commissions;
+  users = this.firestoreService.users; // Lista completa de usuários
 
-  isEditMode = false;
-  isLoading = false;
-  errorMessage: string | null = null;
-
-  model = {
+  model = signal({
     title: '',
     description: '',
+    status: 'todo' as TaskStatus,
+    priority: 'medium' as TaskPriority,
+    dueDate: '',
+    assignedTo: '',
+    organizationId: '',
     commissionId: '',
-    assignedTo: null as string | null,
-  };
+  });
+
+  // --- Permissões e Contexto ---
+  private currentUserProfile = computed(() => {
+    const uid = this.authService.currentUser()?.uid;
+    return this.firestoreService.users().find(u => u.uid === uid);
+  });
+
+  userOrganizationIds = computed(() => {
+    const roles = this.currentUserProfile()?.roles;
+    return roles ? Object.keys(roles) : [];
+  });
+
+  isNationalAdmin = computed(() => {
+    const roles = this.currentUserProfile()?.roles;
+    return roles ? Object.values(roles).includes('admin_nacional') : false;
+  });
+
+  isNucleoLocked = computed(() => !this.isNationalAdmin() && this.userOrganizationIds().length > 0);
+
+  // --- 1. Filtro de Comissões (Cascata) ---
+  availableCommissions = computed(() => {
+    const selectedOrgId = this.model().organizationId;
+    if (!selectedOrgId) return [];
+    return this.allCommissions().filter(c => c.organizationId === selectedOrgId);
+  });
+
+  // --- 2. Filtro de Responsáveis (Apenas membros do Núcleo) ---
+  availableUsers = computed(() => {
+    const selectedOrgId = this.model().organizationId;
+    if (!selectedOrgId) return [];
+
+    // Filtra usuários que tenham a chave do núcleo dentro do seu map de 'roles'
+    // Ex: user.roles = { 'nucleo_sp': 'admin' } -> Vai aparecer se selectedOrgId for 'nucleo_sp'
+    return this.users().filter(u => u.roles && selectedOrgId in u.roles);
+  });
+
+  isLoading = false;
+
+  constructor() {
+    effect(() => {
+      if (this.isNucleoLocked()) {
+        const myOrgId = this.userOrganizationIds()[0];
+        if (this.model().organizationId !== myOrgId) {
+             this.model.update(m => ({ ...m, organizationId: myOrgId }));
+        }
+      }
+    });
+  }
 
   ngOnInit(): void {
     if (this.taskToEdit) {
-      this.isEditMode = true;
-      this.model = {
+      const commission = this.allCommissions().find(c => c.id === this.taskToEdit!.commissionId);
+
+      this.model.set({
         title: this.taskToEdit.title,
         description: this.taskToEdit.description || '',
+        status: this.taskToEdit.status,
+        priority: this.taskToEdit.priority,
+        dueDate: this.taskToEdit.dueDate ? this.formatDateForInput(this.taskToEdit.dueDate.toDate()) : '',
+        assignedTo: this.taskToEdit.assignedTo || '',
+        organizationId: commission ? commission.organizationId : (this.taskToEdit.organizationId || ''),
         commissionId: this.taskToEdit.commissionId,
-        assignedTo: this.taskToEdit.assignedTo || null,
-      };
+      });
     }
   }
 
+  updateField(field: string, value: any) {
+    this.model.update(m => ({ ...m, [field]: value }));
+  }
+
+  onOrganizationChange(orgId: string) {
+    // Reseta comissão e responsável se o núcleo mudar, para evitar inconsistência
+    this.model.update(m => ({ ...m, organizationId: orgId, commissionId: '', assignedTo: '' }));
+  }
+
   async onSave() {
-    this.errorMessage = null;
-    if (!this.model.title || !this.model.commissionId) {
-      this.errorMessage = "Título e Comissão são obrigatórios.";
-      return;
-    }
+    const data = this.model();
+    if (!data.title || !data.commissionId) return;
+
     this.isLoading = true;
     try {
-      if (this.isEditMode && this.taskToEdit) {
-        await this.taskService.updateTaskDetails(this.taskToEdit.id, this.model);
+      const payload = {
+        title: data.title,
+        description: data.description,
+        commissionId: data.commissionId,
+        organizationId: data.organizationId,
+        assignedTo: data.assignedTo,
+        priority: data.priority,
+        dueDate: data.dueDate, // O Service converte para Timestamp
+        status: data.status
+      };
+
+      if (this.taskToEdit) {
+        await this.taskService.updateTask(this.taskToEdit.id, payload);
       } else {
-        await this.taskService.createTask(this.model);
+        await this.taskService.createTask(payload);
       }
       this.close.emit();
     } catch (error) {
-      this.errorMessage = "Ocorreu um erro ao salvar a tarefa.";
       console.error(error);
     } finally {
       this.isLoading = false;
     }
+  }
+
+  private formatDateForInput(date: Date): string {
+    const offset = date.getTimezoneOffset();
+    const adjustedDate = new Date(date.getTime() - (offset * 60 * 1000));
+    return adjustedDate.toISOString().split('T')[0];
   }
 }

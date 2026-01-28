@@ -23,7 +23,7 @@
     </thead>
 
     <tbody class="divide-y divide-gray-700">
-      @for (user of users(); track user.uid) {
+      @for (user of filteredUsers(); track user.uid) {
         <tr class="hover:bg-gray-750 transition-colors duration-150 animate-fade-in-up">
           <td class="px-4 py-3 text-gray-100 font-medium">{{ user?.email }}</td>
           <td class="px-4 py-3 text-gray-400">{{ user.email }}</td>

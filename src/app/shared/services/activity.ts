@@ -9,7 +9,8 @@ interface ActivityFormData {
   title: string;
   description: string;
   date: string;
-  commissionId: string; // <-- ALTERADO DE organizationId
+  commissionId: string;
+  organizationId: string; // <--- ADICIONAR AQUI
 }
 
 @Injectable({
@@ -31,7 +32,8 @@ export class ActivityService {
       title: formData.title,
       description: formData.description,
       date: Timestamp.fromDate(new Date(formData.date)),
-      commissionId: formData.commissionId, // <-- ALTERADO DE organizationId
+      commissionId: formData.commissionId,
+      organizationId: formData.organizationId, // <--- SALVAR NO BANCO
       createdBy: user.uid,
     };
     return addDoc(activitiesCollection, newActivity);
