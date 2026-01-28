@@ -29,7 +29,7 @@ export class MainLayoutComponent {
         </svg>
       `
     },
-    { route: '/tarefas', label: 'Tarefas', icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4zm2.5 4.5a.75.75 0 000 1.5h7a.75.75 0 000-1.5h-7zm0 3.5a.75.75 0 000 1.5h7a.75.75 0 000-1.5h-7zm0 3.5a.75.75 0 000 1.5h4a.75.75 0 000-1.5h-4z" clip-rule="evenodd" /></svg>' }, // <-- NOVO ITEM
+    { route: '/tarefas', label: 'Atividades', icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4zm2.5 4.5a.75.75 0 000 1.5h7a.75.75 0 000-1.5h-7zm0 3.5a.75.75 0 000 1.5h7a.75.75 0 000-1.5h-7zm0 3.5a.75.75 0 000 1.5h4a.75.75 0 000-1.5h-4z" clip-rule="evenodd" /></svg>' }, // <-- NOVO ITEM
     {
       route: '/eventos',
       label: 'Eventos',

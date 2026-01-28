@@ -1,10 +1,12 @@
 // src/app/core/services/admin.service.ts
 
 import { Injectable, inject } from '@angular/core';
-import { addDoc, collection, deleteDoc, doc, Firestore, updateDoc } from '@angular/fire/firestore';
+import { addDoc, collection, deleteDoc, doc, Firestore, serverTimestamp, setDoc, updateDoc } from '@angular/fire/firestore';
 import { UserProfile } from '../../shared/models/user.model';
 import { Organization } from '../../shared/models/organization.model';
 import { Commission } from '../models/commission.model';
+import { getApp, initializeApp, deleteApp } from '@angular/fire/app';
+import { getAuth, createUserWithEmailAndPassword, updateProfile, signOut } from '@angular/fire/auth';
 
 @Injectable({
   providedIn: 'root'
@@ -14,19 +16,12 @@ export class AdminService {
 
   constructor() { }
 
-  /**
-   * Atualiza o mapa de papéis de um usuário específico.
-   * Esta operação só será bem-sucedida se o usuário logado
-   * for um admin, conforme definido nas regras do Firestore.
-   * @param uid O ID do usuário a ser modificado.
-   * @param newRoles O novo objeto de papéis para o usuário.
-   */
-  async updateUserRoles(uid: string, newRoles: UserProfile['roles']): Promise<void> {
-    if (!uid) {
-      throw new Error('User ID is required');
-    }
-    const userDocRef = doc(this.firestore, `users/${uid}`);
-    return updateDoc(userDocRef, { roles: newRoles });
+async updateUserRoles(userId: string, roles: { [key: string]: string }) {
+    const userDocRef = doc(this.firestore, 'users', userId);
+    return updateDoc(userDocRef, {
+      roles: roles,
+      updatedAt: serverTimestamp()
+    });
   }
 
    addOrganization(orgData: Omit<Organization, 'id'>) {
@@ -55,5 +50,47 @@ export class AdminService {
   deleteCommission(id: string) {
     const commissionDocRef = doc(this.firestore, `commissions/${id}`);
     return deleteDoc(commissionDocRef);
+  }
+
+async createUser(email: string, password: string, displayName: string, initialOrgId?: string) {
+    const app = getApp();
+    const secondaryApp = initializeApp(app.options, 'SecondaryApp');
+    const secondaryAuth = getAuth(secondaryApp);
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+      const user = userCredential.user;
+
+      await updateProfile(user, { displayName });
+
+      const userDocRef = doc(this.firestore, 'users', user.uid);
+
+      // Prepara os dados iniciais
+      const userData: any = {
+        uid: user.uid,
+        email: user.email,
+        displayName: displayName,
+        roles: {}, // Inicializa vazio
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      // LÓGICA DE VÍNCULO AUTOMÁTICO
+      if (initialOrgId) {
+        // Define o papel padrão como 'membro' para o núcleo selecionado/automático
+        userData.roles[initialOrgId] = 'membro';
+      }
+
+      await setDoc(userDocRef, userData);
+
+      await signOut(secondaryAuth);
+      await deleteApp(secondaryApp);
+
+      return user;
+
+    } catch (error) {
+      await deleteApp(secondaryApp);
+      throw error;
+    }
   }
 }

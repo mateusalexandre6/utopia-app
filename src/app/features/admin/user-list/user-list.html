@@ -1,16 +1,20 @@
 <div class="overflow-x-auto bg-gray-800 border border-gray-700 rounded-lg shadow-lg p-4">
-  <h3 class="text-xl font-bold text-gray-100 mb-4 flex items-center gap-2">
-    <svg xmlns="http://www.w3.org/2000/svg"
-         fill="none"
-         viewBox="0 0 24 24"
-         stroke-width="1.5"
-         stroke="currentColor"
-         class="w-6 h-6 text-primary">
-      <path stroke-linecap="round" stroke-linejoin="round"
-            d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a8.25 8.25 0 0115 0" />
+
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-xl font-bold text-gray-100 flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-primary">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a8.25 8.25 0 0115 0" />
+      </svg>
+      Usuários
+    </h3>
+
+<button (click)="openCreateModal()" class="btn btn-sm btn-primary text-white flex items-center gap-2">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+      <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
     </svg>
-    Usuários
-  </h3>
+    Novo Usuário
+  </button>
+  </div>
 
   <table class="min-w-full text-sm rounded-lg overflow-hidden">
     <thead class="bg-gray-700 text-gray-200 uppercase tracking-wide text-xs border-b border-gray-600">
@@ -25,13 +29,24 @@
     <tbody class="divide-y divide-gray-700">
       @for (user of filteredUsers(); track user.uid) {
         <tr class="hover:bg-gray-750 transition-colors duration-150 animate-fade-in-up">
-          <td class="px-4 py-3 text-gray-100 font-medium">{{ user?.email }}</td>
+          <td class="px-4 py-3 text-gray-100 font-medium">{{ user.displayName || 'Sem nome' }}</td>
           <td class="px-4 py-3 text-gray-400">{{ user.email }}</td>
-          <td class="px-4 py-3 text-gray-300 text-xs">{{ formatRoles(user.roles) }}</td>
+          <td class="px-4 py-3">
+            <div class="flex flex-wrap gap-2">
+              @for (badge of getRoleBadges(user); track badge.label) {
+                <span class="badge badge-sm whitespace-nowrap {{ badge.class }}">
+                  {{ badge.label }}
+                </span>
+              }
+              @if (getRoleBadges(user).length === 0) {
+                <span class="text-xs text-gray-500 italic">Sem acesso</span>
+              }
+            </div>
+          </td>
           <td class="px-4 py-3 text-right">
             <button (click)="onManageRoles(user)"
-                    class="btn btn-sm bg-primary text-white hover:bg-primary/80 rounded-md shadow-md transition-all">
-              Gerenciar
+                    class="btn btn-sm bg-gray-700 text-white hover:bg-gray-600 border-none rounded-md shadow-md transition-all">
+              Perfil
             </button>
           </td>
         </tr>
@@ -46,6 +61,89 @@
   </table>
 </div>
 
+
+@if (isCreateModalVisible()) {
+  <dialog class="modal modal-open">
+    <div class="modal-box bg-gray-800 text-gray-100 border border-gray-700">
+      <h3 class="font-bold text-lg mb-4 text-white">Cadastrar Novo Usuário</h3>
+
+      <form (ngSubmit)="onCreateUser()" class="space-y-4">
+        <div class="form-control">
+          <label class="label"><span class="label-text text-gray-300">Nome Completo</span></label>
+          <input
+            type="text"
+            [(ngModel)]="newUser().displayName"
+            name="displayName"
+            required
+            class="input input-bordered bg-gray-700 text-white w-full focus:input-primary"
+            placeholder="Ex: Maria Silva"
+          />
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text text-gray-300">E-mail</span></label>
+          <input
+            type="email"
+            [(ngModel)]="newUser().email"
+            name="email"
+            required
+            class="input input-bordered bg-gray-700 text-white w-full focus:input-primary"
+            placeholder="email@exemplo.com"
+          />
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text text-gray-300">Senha Provisória</span></label>
+          <input
+            type="password"
+            [(ngModel)]="newUser().password"
+            name="password"
+            required
+            minlength="6"
+            class="input input-bordered bg-gray-700 text-white w-full focus:input-primary"
+            placeholder="Mínimo 6 caracteres"
+          />
+        </div>
+
+@if (isNationalAdmin()) {
+          <div class="form-control">
+            <label class="label"><span class="label-text text-gray-300">Vincular ao Núcleo (Opcional)</span></label>
+            <select
+              [ngModel]="newUser().organizationId"
+              (ngModelChange)="newUser().organizationId = $event"
+              name="organizationId"
+              class="select select-bordered bg-gray-700 text-white w-full focus:border-primary">
+              <option value="">-- Sem vínculo inicial --</option>
+              @for (org of allOrganizations(); track org.id) {
+                <option [value]="org.id">{{ org.name }}</option>
+              }
+            </select>
+            <label class="label">
+              <span class="label-text-alt text-gray-400">O usuário será criado com o papel de 'membro'.</span>
+            </label>
+          </div>
+        }
+
+        <div class="modal-action mt-6">
+          <button type="button" (click)="closeCreateModal()" class="btn btn-ghost hover:bg-gray-700">
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="isCreating() || !newUser().email || !newUser().password || !newUser().displayName">
+            @if (isCreating()) { <span class="loading loading-spinner loading-xs"></span> }
+            Criar Usuário
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <form method="dialog" class="modal-backdrop" (click)="closeCreateModal()">
+      <button>close</button>
+    </form>
+  </dialog>
+}
 @if (selectedUser) {
   <app-role-manager
     [user]="selectedUser"

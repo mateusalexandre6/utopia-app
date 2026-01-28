@@ -16,41 +16,43 @@ import { FirestoreService } from '../../../shared/services/firestore.service';
     CommissionListComponent
   ],
   templateUrl: './admin-dashboard.html',
-  styleUrl: './admin-dashboard.css' // Se existir esse arquivo
+  styleUrl: './admin-dashboard.css' // Se existir
 })
 export class AdminDashboard {
   private authService = inject(AuthService);
   private firestoreService = inject(FirestoreService);
 
-  // Começa com uma tab segura, depois o effect ajusta se necessário
+  // Aba padrão inicial
   activeTab = signal<'organizations' | 'commissions' | 'users'>('commissions');
 
   // --- Lógica de Permissões ---
   private currentUserProfile = computed(() => {
     const uid = this.authService.currentUser()?.uid;
-    return this.firestoreService.users().find(u => u.uid === uid);
+    // Garante que a lista de usuários foi carregada antes de buscar
+    const users = this.firestoreService.users();
+    return users.find(u => u.uid === uid);
   });
 
   isNationalAdmin = computed(() => {
-    const roles = this.currentUserProfile()?.roles;
-    return roles ? Object.values(roles).includes('admin_nacional') : false;
+    const profile = this.currentUserProfile();
+    // Verificação defensiva (profile pode ser undefined no carregamento)
+    if (!profile || !profile.roles) return false;
+    return Object.values(profile.roles).includes('admin_nacional');
   });
 
   constructor() {
-    // Efeito de Redirecionamento de Segurança
+    // Efeito de Segurança
     effect(() => {
-      // Se for Admin Nacional, pode ver a aba de Organizações (padrão)
-      if (this.isNationalAdmin()) {
-        // Só define como padrão se o usuário ainda não tiver navegado
-        if (this.activeTab() === 'commissions') {
-           this.activeTab.set('organizations');
-        }
-      } else {
-        // Se NÃO for Admin Nacional e estiver tentando ver Organizações, joga para Comissões
-        if (this.activeTab() === 'organizations') {
-          this.activeTab.set('commissions');
-        }
+      const isAdmin = this.isNationalAdmin();
+      const currentTab = this.activeTab();
+
+      // REGRA DE BLOQUEIO:
+      // Apenas impede quem NÃO é admin de entrar na aba 'organizations'.
+      // Se for Admin Nacional, ele é livre para navegar onde quiser.
+      if (!isAdmin && currentTab === 'organizations') {
+        this.activeTab.set('commissions');
       }
+
     }, { allowSignalWrites: true });
   }
 }

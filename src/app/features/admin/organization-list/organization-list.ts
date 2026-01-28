@@ -1,10 +1,10 @@
 import { Component, computed, inject } from '@angular/core';
-import { CommonModule } from '@angular/common'; // Adicionei CommonModule para o @if
+import { CommonModule } from '@angular/common';
 import { FirestoreService } from '../../../shared/services/firestore.service';
 import { OrganizationFormComponent } from '../organization-form/organization-form';
 import { Organization } from '../../../shared/models/organization.model';
 import { AdminService } from '../../../shared/services/admin';
-import { AuthService } from '../../../shared/services/auth.service'; // Novo
+import { AuthService } from '../../../shared/services/auth.service';
 
 @Component({
   selector: 'app-organization-list',
@@ -18,7 +18,7 @@ export class OrganizationListComponent {
   private authService = inject(AuthService);
 
   organizations = this.firestoreService.organizations;
-  users = this.firestoreService.users; // Necessário para buscar roles
+  users = this.firestoreService.users;
 
   isFormVisible = false;
   editingOrganization: Organization | null = null;
@@ -34,6 +34,28 @@ export class OrganizationListComponent {
     const roles = this.currentUserProfile()?.roles;
     return roles ? Object.values(roles).includes('admin_nacional') : false;
   });
+
+  // --- Auxiliares de UI (Novos) ---
+
+  getLevelBadge(level: string) {
+    const configs: any = {
+      'national': { label: 'Nacional', class: 'badge-warning text-yellow-950 font-bold' },
+      'state': { label: 'Estadual', class: 'badge-primary text-white' },
+      'local': { label: 'Local', class: 'badge-neutral text-gray-300' }
+    };
+    return configs[level] || { label: level, class: 'badge-ghost' };
+  }
+
+  getTypeBadge(type: string) {
+    const configs: any = {
+      'nucleo': { label: 'Núcleo', class: 'badge-info text-blue-950 font-bold' },
+      'support': { label: 'Apoio', class: 'badge-secondary text-white' },
+      'other': { label: 'Outro', class: 'badge-ghost' }
+    };
+    return configs[type] || { label: type, class: 'badge-outline text-gray-400' };
+  }
+
+  // --- Ações ---
 
   onEdit(org: Organization) {
     this.editingOrganization = org;

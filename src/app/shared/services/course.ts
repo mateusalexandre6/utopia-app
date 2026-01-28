@@ -1,6 +1,6 @@
 // src/app/core/services/course.service.ts
 import { Injectable, inject } from '@angular/core';
-import { Firestore, addDoc, collection, doc, updateDoc, Timestamp } from '@angular/fire/firestore';
+import { Firestore, addDoc, collection, doc, updateDoc, Timestamp, deleteDoc } from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
 import { CourseLocationType, LearningObjective } from '../models/course.model';
 
@@ -46,5 +46,10 @@ export class CourseService {
     const courseDocRef = doc(this.firestore, 'courses', courseId);
     // Não atualizamos o 'createdAt'
     return updateDoc(courseDocRef, { ...formData });
+  }
+
+  async deleteCourse(courseId: string) {
+    const courseDocRef = doc(this.firestore, 'courses', courseId);
+    return deleteDoc(courseDocRef);
   }
 }

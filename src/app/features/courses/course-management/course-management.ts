@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../shared/services/auth.service';
 import { FirestoreService } from '../../../shared/services/firestore.service';
+import { CourseService } from '../../../shared/services/course';
 
 @Component({
   selector: 'app-course-management',
@@ -35,6 +36,8 @@ export class CourseManagementComponent {
     return roles ? Object.keys(roles) : [];
   });
 
+  private courseService = inject(CourseService);
+
   // **LÓGICA CHAVE**: Identifica as comissões de formação do usuário
   private userFormationCommissions = computed(() => {
     if (this.isNationalAdmin()) {
@@ -61,6 +64,18 @@ export class CourseManagementComponent {
         commissionName: commMap.get(course.commissionId) || 'Comissão Desconhecida',
       }));
   });
+
+  async onDeleteCourse(course: any) {
+    if (confirm(`Tem certeza que deseja excluir o curso "${course.title}"? Esta ação não pode ser desfeita.`)) {
+      try {
+        await this.courseService.deleteCourse(course.id);
+        // O signal allCourses atualizará automaticamente se estiver ouvindo o Firestore
+      } catch (error) {
+        console.error('Erro ao excluir curso:', error);
+        alert('Erro ao excluir curso.');
+      }
+    }
+  }
 
   // --- Métodos de Ação ---
   navigateToCourse(courseId: string) {
